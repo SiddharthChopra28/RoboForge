@@ -1,0 +1,10 @@
+cmake-build-debug/
+__pycache__/
+simulator/cmake-build-debug/
+simulator/test.cpp
+simulator/test
+simulator/simulator
+simulator/sock
+.idea/
+.venv/
+CMakeLists.txt
