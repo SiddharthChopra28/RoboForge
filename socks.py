@@ -42,5 +42,16 @@ class Sock:
     def end_sock(self):
         self.client_socket.close()
 
+# if __name__ == "__main__":
+#     x = 0
+#     sock = Sock()
+#     while not sock.connect():
+#         pass
+#
+#     while True:
+#         x+=1
+#         print(x)
+#         sock.send_msg("Hi from python")
+#         print(sock.receive_data())
 
 

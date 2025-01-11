@@ -1,5 +1,7 @@
 # List of supported features in the language
 
+IMP: need to have xterm and g++ installed on linux  
+
 some rules for the board:  
 take default operating voltage = 5V  
 it requires atleast 5V input in either Vin or Power port to work  
@@ -31,8 +33,11 @@ if analogwrite is used on nonpwm pin, then if <-127 -> low else high
 
 For communication bw python and cpp code, using sockets  
 python sends command to cpp, and cpp returns states of all present components  
-start and end of command character: ; eg: ;COMMAND; 
-after receiving command, also send back acknowledgment
+after receiving command, also send back acknowledgment  
+
+python sends msg in the form eg: "COMMAND:INIT:{data}" or "COMMAND:STOP:"
+
+
 ## Serial:
 
 Functions supported so far

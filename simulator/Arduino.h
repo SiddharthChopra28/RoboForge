@@ -1,11 +1,13 @@
 #ifndef ROBOFORGE_ARDUINO_H
 #define ROBOFORGE_ARDUINO_H
 
-
 #include "_time.h"
 #include "hserial.h"
 #include "components.h"
 #include "funcs.h"
+#include "sock.h"
+#include "engine.h"
+#include <vector>
 
 #define hr_clock std::chrono::high_resolution_clock
 #define hr_time_point hr_clock::time_point
@@ -16,10 +18,14 @@
 
 #define empty()
 
-
 Arduino ard = Arduino(32,5);
 hr_time_point start_time;
 HSerial Serial;
+std::vector<Component*> comps;
+std::vector<Wire*> wires;
+
+#define String string
+// both are not the same but do this temporarily
 
 #define pinMode(a, b) pinMode_(ard, a, b)
 #define digitalWrite(a, b) digitalWrite_(ard, a, b)
@@ -186,7 +192,6 @@ static const uint8_t A7 = PIN_A7;
 
 #define SERIAL_PORT_MONITOR   Serial
 #define SERIAL_PORT_HARDWARE  Serial
-
 
 
 #endif

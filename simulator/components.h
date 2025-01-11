@@ -3,8 +3,14 @@
 
 
 #include <iostream>
-
 using namespace std;
+
+// components ids
+#define ARDUINO 0
+#define IR 1
+#define SOMETHING 2
+
+// pin ids
 #define PIN_D0 0
 #define PIN_D1 1
 #define PIN_D2 2
@@ -19,11 +25,6 @@ using namespace std;
 #define PIN_D11 11 //pwm
 #define PIN_D12 12
 #define PIN_D13 13
-
-#define PIN_R_GND 29
-#define PIN_AREF 30
-#define PIN_SDA 31
-#define PIN_SCL 32
 
 #define PIN_A0 14
 #define PIN_A1 15
@@ -41,6 +42,12 @@ using namespace std;
 #define PIN_3V3 26
 #define PIN_RESET 27
 #define PIN_IOREF 28
+
+#define PIN_R_GND 29
+#define PIN_AREF 30
+#define PIN_SDA 31
+#define PIN_SCL 32
+
 
 #define PIN_IRSENSOR_VIN 0
 #define PIN_IRSENSOR_GND 1

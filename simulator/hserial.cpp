@@ -1,14 +1,6 @@
 #include "hserial.h"
 
 
-//void HSerial::begin(unsigned long baud){
-//    //do nothing;
-//}
-
-//void HSerial::end(){
-//    // do nothing;
-//}
-
 
 void HSerial::flush(){
     cout<<std::flush;

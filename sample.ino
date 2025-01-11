@@ -2,9 +2,12 @@ int a = 1;
 
 void setup(){
     Serial.begin(9600);
-    Serial.print("Hello world");
+    Serial.println("Hello world");
+//    String x = Serial.readString();
+//    Serial.println(x+";;;");
+
 }
 
 void loop(){
-    Serial.print("Bye world");
+//    Serial.println("Bye world");
 }

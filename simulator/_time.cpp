@@ -1,12 +1,12 @@
 #include "_time.h"
 
-long long get_millis(hr_time_point st){
+long long get_millis(hr_time_point& st){
     hr_duration d = hr_clock::now() - st;
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(d);
     return ms.count();
 }
 
-long long get_micros(hr_time_point st){
+long long get_micros(hr_time_point& st){
     hr_duration d = hr_clock::now() - st;
     std::chrono::microseconds ms = std::chrono::duration_cast<std::chrono::microseconds>(d);
     return ms.count();
