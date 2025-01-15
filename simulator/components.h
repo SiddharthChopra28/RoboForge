@@ -85,16 +85,17 @@ public:
     Component(int no_pins, float opVol);
     void connectPin(int pinid, Wire& wire) const;
     void disconnectPin(int pinid, Wire& wire) const;
+
     ~Component();
-//    void pinMode();
 
 };
+
 class IRSensor: public Component{
 public:
     IRSensor(int no_pins, float ov);
-    bool state=LOW;
+    bool obstacle=false;
     bool getOutput();
-    void setState(bool);
+    void setInput(bool);
 };
 
 
@@ -103,6 +104,7 @@ public:
     Arduino(int no_pins, float ov);
     float analogReference;
 };
+
 class Pin{
 public:
     int id;
@@ -127,31 +129,31 @@ class DigitalPin: public Pin{
 public:
     // can read high/low and can write high/low
     DigitalPin(Component* pc, int _id);
-    float getPinPotential();
-    void setPinPotential(float hl);
+    float getPinPotential() override;
+    void setPinPotential(float hl) override;
 };
 
 class DigitalPwmPin: public Pin{
 public:
     DigitalPwmPin(Component* pc, int _id);
-    float getPinPotential();
+    float getPinPotential() override;
 
-    void setPinPotential(float pp);
+    void setPinPotential(float pp) override;
 };
 
 class AnalogPin: public Pin{
 public:
     AnalogPin(Component* pc, int _id);
-    float getPinPotential();
-    void setPinPotential(float hl);
+    float getPinPotential() override;
+    void setPinPotential(float hl) override;
 };
 
 class PowerPin: public Pin{
 public:
     PowerPin(Component* pc, int _id);
-    float getPinPotential();
+    float getPinPotential() override;
 
-    void setPinPotential(float pp);
+    void setPinPotential(float pp) override;
 
 };
 

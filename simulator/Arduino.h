@@ -22,7 +22,7 @@ Arduino ard = Arduino(32,5);
 hr_time_point start_time;
 HSerial Serial;
 std::vector<Component*> comps;
-std::vector<Wire*> wires;
+std::vector<shared_ptr<Wire>> wires;
 
 #define String string
 // both are not the same but do this temporarily
@@ -190,7 +190,7 @@ static const uint8_t A7 = PIN_A7;
 #define digitalPinToInterrupt(p)  ((p) == 2 ? 0 : ((p) == 3 ? 1 : NOT_AN_INTERRUPT))
 
 
-#define SERIAL_PORT_MONITOR   Serial
+#define SERIAL_PORT_MONITO  R   Serial
 #define SERIAL_PORT_HARDWARE  Serial
 
 

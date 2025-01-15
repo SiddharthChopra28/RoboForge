@@ -79,13 +79,13 @@ PowerPin::PowerPin(Component* pc, int _id): Pin(pc, _id){
         mode = OUTPUT;
     }
     else if (id == PIN_IOREF || id == PIN_SCL || id == PIN_SDA){
-        pinPotential = (*parentComponent).operatingVoltage;
-        defaultPotential = (*parentComponent).operatingVoltage;
+        pinPotential = parentComponent->operatingVoltage;
+        defaultPotential = parentComponent->operatingVoltage;
         mode = OUTPUT;
     }
     else if (id == PIN_RESET){
-        pinPotential = (*parentComponent).operatingVoltage;
-        defaultPotential = (*parentComponent).operatingVoltage;
+        pinPotential = parentComponent->operatingVoltage;
+        defaultPotential = parentComponent->operatingVoltage;
         mode = INPUT;
     }
     else{
@@ -209,15 +209,15 @@ IRSensor::IRSensor(int no_pins, float ov) : Component(no_pins, ov){
 
 bool IRSensor::getOutput() {
     if (pins[PIN_IRSENSOR_VIN]->getPinPotential() == operatingVoltage && pins[PIN_IRSENSOR_GND]->getPinPotential() == LOW){
-        return state;
+        return obstacle;
     }
     else{
         return LOW;
     }
 }
 
-void IRSensor::setState(bool s) {
-    state = s;
+void IRSensor::setInput(bool s) {
+    obstacle = s;
 }
 
 

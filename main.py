@@ -1,6 +1,7 @@
 import pygame.draw
 
 from comps import *
+from ids import *
 from socks import Sock
 from ardparser import ardparser
 from PyQt5.QtWidgets import QApplication, QFileDialog
@@ -26,15 +27,23 @@ def make_circuit_dict():
     d = {'COMPS': [], 'CONNECTIONS':[]}
     for comp in components:
         d['COMPS'].append(comp.id)
+
     for w in wires:
-        e = ((w.node1.parent_id, w.node1.id), (w.node2.parent_id, w.node2.id))
-        # if there are muliple objects of same component then this will cause issue. fix it
-        # a possible solution: maintain a counter for each clss initializr usin somethinglike static pf cpp but in python
+        e = [[components.index(w.node1.parent_comp), w.node1.id], [components.index(w.node2.parent_comp), w.node2.id]]
         d['CONNECTIONS'].append(e)
 
     return d
 
+def make_cond_list():
+    d = [] # component index : state
 
+    for comp in components:
+        if comp.id == ARDUINO:
+            d.append(0)
+        elif comp.id == IR:
+            d.append(comp.status)
+
+    return d
 
 WIDTH = 1400
 HEIGHT = 800
@@ -56,7 +65,6 @@ pygame.font.init()
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("RoboForge")
-
 
 
 # ard_img = pygame.transform.scale(ard_img, (WIDTH*scaling_factor, HEIGHT*scaling_factor))
@@ -105,6 +113,7 @@ wire_node1 = None
 
 running = True
 socket_connected = False
+editing_mode = True
 # sock = None
 sock = Sock()
 
@@ -120,7 +129,6 @@ socket_thread = None
 while running:
     #define vars
     pane_switched = False
-
     # when user starts code running, sock object will be created. when user stops code running, sock is set to none
     if sock is not None:
         if not socket_connected:
@@ -128,7 +136,9 @@ while running:
                 socket_connected = True
                 print("socket_connected")
                 circ_dict_json = json.dumps(make_circuit_dict())
-                sock.send_msg(f"COMMAND:INIT:{circ_dict_json}")
+                sock.send_msg(f"COMMAND:CIRCUIT:{circ_dict_json}")
+                cond_dict_json = json.dumps(make_cond_list())
+                sock.send_msg(f"COMMAND:CONDITIONS:{cond_dict_json}")
                 socket_thread = Thread(target=process_input, args=(sock,), daemon=True)
                 socket_thread.start()
 
@@ -167,26 +177,27 @@ while running:
 
             elif event.button == 3:
                 #check for wire attachment/detachment
-                for component in components.__reversed__():
-                    for node in component.nodes:
-                        if node.rect.collidepoint(event.pos):
-                            # if node already has a wire connected, can't connect new but can remove existing
-                            if node.wire:
-                                if wire_node1:
-                                    pass
+                if editing_mode:
+                    for component in components.__reversed__():
+                        for node in component.nodes:
+                            if node.rect.collidepoint(event.pos):
+                                # if node already has a wire connected, can't connect new but can remove existing
+                                if node.wire:
+                                    if wire_node1:
+                                        pass
+                                    else:
+                                        wires.remove(node.wire)
+                                        wire_node1 = node.wire.node2 if node.wire.node1 == node else node.wire.node1
+                                        node.wire = None
+                                # if there is no wire on the node, we can connect new wire
                                 else:
-                                    wires.remove(node.wire)
-                                    wire_node1 = node.wire.node2 if node.wire.node1 == node else node.wire.node1
-                                    node.wire = None
-                            # if there is no wire on the node, we can connect new wire
-                            else:
-                                if wire_node1:
-                                    if node!=wire_node1:
-                                        wires.append(Wire(wire_node1, node))
-                                        wire_node1 = None
-                                else:
-                                    wire_node1 = node
-                            break
+                                    if wire_node1:
+                                        if node!=wire_node1:
+                                            wires.append(Wire(wire_node1, node))
+                                            wire_node1 = None
+                                    else:
+                                        wire_node1 = node
+                                break
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -224,9 +235,10 @@ while running:
             # check for conditional buttons
             if active_pane == COMP:
                 # check for spawn ir button
-                if spawn_ir_button_rect.collidepoint(event.pos):
-                    ir = make_comp_ir()
-                    components.append(ir)
+                if editing_mode:
+                    if spawn_ir_button_rect.collidepoint(event.pos):
+                        ir = make_comp_ir()
+                        components.append(ir)
 
             if active_pane == CODE:
                 #check for upload_code button
@@ -265,7 +277,7 @@ while running:
                     if code_file:
                         editing_mode = False
                         ardparser(code_file)
-                        print("OK")
+
 
 
 

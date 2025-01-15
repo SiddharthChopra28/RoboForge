@@ -16,11 +16,12 @@ int main(){
     bool exit = false;
     while (!exit){
         string recd = sock.getMessage();
-        processInput(recd, exit, comps, wires);
+        processInput(recd, exit, comps, wires, ard);
         loop();
         sock.sendMessage(";"+giveOutput()+";");
     }
 }
+
 '''
 
 
@@ -36,13 +37,12 @@ def write_code(filename, code):
 def ardparser(filename):
     c = TOP + read_file(filename) + BOTTOM
     write_code("./simulator/simulator.cpp", c)
-    # g++ -o simulator simulator.cpp hserial.cpp funcs.cpp components.cpp _time.cpp
-    # if sys.platform == "linux":
-    #     subprocess.run("cd simulator && g++ -o simulator simulator.cpp hserial.cpp sock.cpp funcs.cpp components.cpp _time.cpp", shell=True)
-    #     subprocess.Popen("./simulator/simulator")
-    #
-    #     # subprocess.Popen(["./simulator/simulator"])
-    # elif sys.platform == "win32":
-    #     # do something
-    #     pass
+
+    if sys.platform == "linux":
+        subprocess.run("cd simulator && g++ -o simulator simulator.cpp hserial.cpp sock.cpp funcs.cpp components.cpp _time.cpp engine.cpp", shell=True)
+        subprocess.Popen("./simulator/simulator")
+
+    elif sys.platform == "win32":
+        # do something
+        pass
 

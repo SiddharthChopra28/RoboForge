@@ -11,12 +11,14 @@ class Component:
         self.nodes = []
         self.id = None
 
+        self.status = None
+
         self.being_dragged = False
         self.drag_mouse_coord = None
         self.drag_og_coord = None
 
     def add_node(self, offset_x, offset_y, width, height, node_id):
-        self.nodes.append(Node(self.rect, offset_x, offset_y, width, height, node_id, self.id))
+        self.nodes.append(Node(self.rect, offset_x, offset_y, width, height, node_id, self))
 
     def move_nodes(self):
         for node in self.nodes:
@@ -25,15 +27,15 @@ class Component:
 
 class Node:
     """parent rect, offsets from center of parent rect"""
-    def __init__(self, parent_rect, offset_x, offset_y, width, height, node_id, parent_id):
+    def __init__(self, parent_rect, offset_x, offset_y, width, height, node_id, parent_comp):
         self.rect = pygame.Rect((0,0,width, height))
         self.rect.center = (parent_rect.centerx+offset_x, parent_rect.centery+offset_y)
         self.parent_rect = parent_rect
+        self.parent_comp = parent_comp
+        self.id = node_id
         self.offset_x = offset_x
         self.offset_y = offset_y
         self.wire = None
-        self.parent_id = parent_id
-        self.id = node_id
 
 
     def update_coords(self):
@@ -76,6 +78,8 @@ def make_comp_ir():
     ir_comp.id = IR
     y=-15
     pins = [(0, PIN_IRSENSOR_VIN), (12, PIN_IRSENSOR_GND), (12, PIN_IRSENSOR_OUT)]
+
+    ir_comp.status = 0
 
     for increment, node_id in pins:
         y += increment
