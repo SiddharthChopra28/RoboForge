@@ -9,7 +9,8 @@
 using namespace std;
 using json = nlohmann::json;
 
-void processInput(string& recd, bool& exit, std::vector<Component*>& comps, std::vector<shared_ptr<Wire>>& wires, Arduino& ard);
-string giveOutput();
+void processInput(string& recd, bool& exit, std::vector<std::shared_ptr<Component>>& comps, std::vector<shared_ptr<Wire>>& wires, std::shared_ptr<Arduino> ard);
+
+string giveOutput(std::vector<shared_ptr<Component>>& comps);
 
 #endif

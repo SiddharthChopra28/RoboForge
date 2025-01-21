@@ -8,7 +8,6 @@ BOTTOM = '''
 
 int main(){
     ::start_time = hr_clock::now();
-    ::ard = Arduino(32,5);
     Socket sock = Socket("127.0.0.1", 8080);
 
     setup();
@@ -18,9 +17,11 @@ int main(){
         string recd = sock.getMessage();
         processInput(recd, exit, comps, wires, ard);
         loop();
-        sock.sendMessage(";"+giveOutput()+";");
+        sock.sendMessage(giveOutput(comps));
     }
 }
+
+
 
 '''
 

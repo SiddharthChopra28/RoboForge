@@ -16,7 +16,6 @@ public:
             return string(value).length();
         }
         catch(...){
-            // if the value is not printable
             return 0;
         }
     }
@@ -27,7 +26,6 @@ public:
             return string(value).length();
         }
         catch(...){
-            // if the value is not printable
             return 0;
         }
     }

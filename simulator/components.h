@@ -3,12 +3,14 @@
 
 
 #include <iostream>
+#include <vector>
+#include <memory>
 using namespace std;
 
 // components ids
 #define ARDUINO 0
 #define IR 1
-#define SOMETHING 2
+#define LED 2
 
 // pin ids
 #define PIN_D0 0
@@ -25,6 +27,7 @@ using namespace std;
 #define PIN_D11 11 //pwm
 #define PIN_D12 12
 #define PIN_D13 13
+#define LED_BUILTIN 13
 
 #define PIN_A0 14
 #define PIN_A1 15
@@ -60,6 +63,9 @@ using namespace std;
 #define OUTPUT 1
 #define INPUT_PULLUP 2
 
+#define PIN_LED_POS 0
+#define PIN_LED_NEG 1
+
 #define DIGITAL 0
 #define DIGITALPWM 1
 #define ANALOG 2
@@ -76,17 +82,17 @@ class PowerPin;
 class Arduino;
 class IRSensor;
 
-class Component {
+class Component : public std::enable_shared_from_this<Component>{
 public:
     int no_of_pins;
-    Pin** pins;
+    std::vector<shared_ptr<Pin>> pins;
     float operatingVoltage;
 
     Component(int no_pins, float opVol);
-    void connectPin(int pinid, Wire& wire) const;
-    void disconnectPin(int pinid, Wire& wire) const;
-
-    ~Component();
+    void connectPin(int pinid, std::shared_ptr<Wire> wire);
+    void disconnectPin(int pinid, std::shared_ptr<Wire> wire) const;
+    virtual int getState()=0;
+    virtual void setState(int);
 
 };
 
@@ -94,28 +100,46 @@ class IRSensor: public Component{
 public:
     IRSensor(int no_pins, float ov);
     bool obstacle=false;
-    bool getOutput();
-    void setInput(bool);
+    int getState() override;
+    void setState(int) override;
+    static std::shared_ptr<IRSensor> create(int no_pins, float ov);
+    void initialize();
+
 };
 
 
 class Arduino: public Component{
 public:
     Arduino(int no_pins, float ov);
+    static std::shared_ptr<Arduino> create(int no_pins, float ov);
+    void initialize();
     float analogReference;
+    int getState() override;
+    void setState(int) override;
 };
 
-class Pin{
+class Led: public Component{
+public:
+    Led(int no_pins, float ov);
+    static std::shared_ptr<Led> create(int no_pins, float ov);
+    void initialize();
+    int getState() override;
+    void setState(int) override;
+
+};
+
+
+class Pin : public std::enable_shared_from_this<Pin>{
 public:
     int id;
     int mode = INPUT;
     int type;
     bool wireConnected = false;
-    Wire* wire = nullptr;
-    Component* parentComponent;
+    std::shared_ptr<Wire> wire;
 
-    Pin(Component* pc, int id);
-    virtual ~Pin() = default;
+    std::shared_ptr<Component> parentComponent;
+
+    Pin(std::shared_ptr<Component> pc, int id);
 
     virtual float getPinPotential() = 0; // returns voltage of the pin
 
@@ -128,14 +152,14 @@ public:
 class DigitalPin: public Pin{
 public:
     // can read high/low and can write high/low
-    DigitalPin(Component* pc, int _id);
+    DigitalPin(std::shared_ptr<Component> pc, int _id);
     float getPinPotential() override;
     void setPinPotential(float hl) override;
 };
 
 class DigitalPwmPin: public Pin{
 public:
-    DigitalPwmPin(Component* pc, int _id);
+    DigitalPwmPin(std::shared_ptr<Component> pc, int _id);
     float getPinPotential() override;
 
     void setPinPotential(float pp) override;
@@ -143,14 +167,14 @@ public:
 
 class AnalogPin: public Pin{
 public:
-    AnalogPin(Component* pc, int _id);
+    AnalogPin(std::shared_ptr<Component> pc, int _id);
     float getPinPotential() override;
     void setPinPotential(float hl) override;
 };
 
 class PowerPin: public Pin{
 public:
-    PowerPin(Component* pc, int _id);
+    PowerPin(std::shared_ptr<Component> pc, int _id);
     float getPinPotential() override;
 
     void setPinPotential(float pp) override;
@@ -158,16 +182,17 @@ public:
 };
 
 
-class Wire{
+class Wire : public std::enable_shared_from_this<Wire>{
 public:
-    Component* c1 = nullptr;
-    Component* c2 = nullptr; // the components at the two ends of the wires
+    std::shared_ptr<Component> c1 = nullptr;
+    std::shared_ptr<Component> c2 = nullptr;
 
-    Pin* p1 = nullptr;
-    Pin* p2 = nullptr;
+    std::shared_ptr<Pin> p1 = nullptr;
+    std::shared_ptr<Pin> p2 = nullptr;
 
-    bool connectEnd(Pin* pin); //returns true if success. false if fail
-    bool disconnectEnd(Pin* pin); //returns true if success. false if fail
+
+    bool connectEnd(std::shared_ptr<Pin>); //returns true if success. false if fail
+    bool disconnectEnd(std::shared_ptr<Pin>); //returns true if success. false if fail
     int get_no_ends_connected() const;
 };
 

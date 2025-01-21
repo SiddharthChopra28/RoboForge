@@ -1,4 +1,4 @@
-import pygame.draw
+from json import JSONDecodeError
 
 from comps import *
 from ids import *
@@ -16,11 +16,21 @@ def open_file_dialog():
     app.exit()
     return file_path
 
+prev_states = None
 def process_input(sc):
     while True:
         data = sc.receive_data()
         print(data)
-        # do some things with this data
+        try:
+            data_dict = json.loads(data)
+        except JSONDecodeError:
+            continue
+        states = data_dict["STATES"]
+        if states != prev_states:
+            for n, comp in enumerate(components):
+                if comp.state != states[n]:
+                    comp.set_state(states[n])
+
 
 
 def make_circuit_dict():
@@ -35,15 +45,7 @@ def make_circuit_dict():
     return d
 
 def make_cond_list():
-    d = [] # component index : state
-
-    for comp in components:
-        if comp.id == ARDUINO:
-            d.append(0)
-        elif comp.id == IR:
-            d.append(comp.status)
-
-    return d
+    return [comp.get_state() for comp in components]
 
 WIDTH = 1400
 HEIGHT = 800
@@ -73,7 +75,7 @@ code_file = None
 
 wires = []
 components = []
-ard_comp = make_comp_ard()
+ard_comp = Arduino()
 components.append(ard_comp)
 
 
@@ -98,6 +100,9 @@ cond_t_rect = cond_t.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+207, HEIGHT//25+75))
 spawn_ir_button = font_rob.render("+ IR Sensor", True, WHITE)
 spawn_ir_button_rect = spawn_ir_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//5))
 
+spawn_led_button = font_rob.render("+ LED", True, WHITE)
+spawn_led_button_rect = spawn_led_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//4))
+
 upload_code_button = font_rob.render("Upload Code", True, WHITE)
 upload_code_button_rect = upload_code_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//4))
 
@@ -119,7 +124,7 @@ sock = Sock()
 
 
 global_button_rects = [comp_t_rect, code_t_rect, cond_t_rect]
-comp_button_rects = [spawn_ir_button_rect]
+comp_button_rects = [spawn_ir_button_rect, spawn_led_button_rect]
 code_button_rects = [upload_code_button_rect]
 cond_button_rects = []
 visible_button_rects = global_button_rects+comp_button_rects
@@ -234,13 +239,17 @@ while running:
 
             # check for conditional buttons
             if active_pane == COMP:
-                # check for spawn ir button
+                # check for buttons
                 if editing_mode:
                     if spawn_ir_button_rect.collidepoint(event.pos):
-                        ir = make_comp_ir()
+                        ir = IRSensor()
                         components.append(ir)
+                    elif spawn_led_button_rect.collidepoint(event.pos):
+                        led = Led()
+                        components.append(led)
 
-            if active_pane == CODE:
+
+            elif active_pane == CODE:
                 #check for upload_code button
                 if upload_code_button_rect.collidepoint(event.pos):
                     file = open_file_dialog()
@@ -277,6 +286,10 @@ while running:
                     if code_file:
                         editing_mode = False
                         ardparser(code_file)
+
+
+            elif active_pane == COND:
+                pass
 
 
 
@@ -317,11 +330,15 @@ while running:
     # render conditional components:
     if active_pane == COMP:
         window.blit(spawn_ir_button, spawn_ir_button_rect.topleft)
+        window.blit(spawn_led_button, spawn_led_button_rect.topleft)
 
-    if active_pane == CODE:
+    elif active_pane == CODE:
         window.blit(upload_code_button, upload_code_button_rect.topleft)
         window.blit(run_code_button, run_code_button_rect.topleft)
         window.blit(code_status_text, (WIDTH-SIDEBAR_WIDTH, HEIGHT//5))
+
+    elif active_pane == COND:
+        pass
 
     for component in components:
         component.rect.clamp_ip(editor_area)
@@ -334,7 +351,14 @@ while running:
     for wire in wires:
         pygame.draw.line(window, RED, wire.node1.rect.center, wire.node2.rect.center, width=3)
 
+    # led_comp.add_node(-5, 56, 8, 8, PIN_LED_POS)
+    # led_comp.add_node(13, 49, 8, 8, PIN_LED_NEG)
+
+
+
     pygame.display.flip()
 
+
+sock.send_msg(f"COMMAND:EXIT:")
 pygame.quit()
 

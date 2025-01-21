@@ -1,6 +1,6 @@
 #include "engine.h"
 
-void processInput(string& recd, bool& exit, std::vector<Component*>& comps, std::vector<shared_ptr<Wire>>& wires, Arduino& ard){
+void processInput(string& recd, bool& exit, std::vector<shared_ptr<Component>>& comps, std::vector<shared_ptr<Wire>>& wires, std::shared_ptr<Arduino> ard){
 
     if (recd == "NODATA"){
         return;
@@ -34,10 +34,13 @@ void processInput(string& recd, bool& exit, std::vector<Component*>& comps, std:
             for (const auto& id: circuit["COMPS"]){
                 switch(id.get<int>()){
                     case (ARDUINO):
-                        comps.push_back(&ard);
+                        comps.push_back(ard);
                         break;
                     case (IR):
-                        comps.push_back(new IRSensor(3, 5));
+                        comps.push_back(IRSensor::create(3,5));
+                        break;
+                    case (LED):
+                        comps.push_back(Led::create(2, 5));
                         break;
                 }
             }
@@ -48,22 +51,21 @@ void processInput(string& recd, bool& exit, std::vector<Component*>& comps, std:
             for (const auto& conn: circuit["CONNECTIONS"]){
                 wires.push_back(make_shared<Wire>());
 
-                comps[conn[0][0].get<int>()]->connectPin(conn[0][1].get<int>(),  *wires[wires.size()-1]);
-                comps[conn[1][0].get<int>()]->connectPin(conn[1][1].get<int>(),  *wires[wires.size()-1]);
+                comps[conn[0][0].get<int>()]->connectPin(conn[0][1].get<int>(),  wires.back());
+                comps[conn[1][0].get<int>()]->connectPin(conn[1][1].get<int>(),  wires.back());
                 cout<<"OK"<<endl;
-                // still not working ;-;
             }
 
-
+            cout<<"done";
 //        }
 //        catch (json::parse_error){}
     }
 
     else if (cmd == "CONDITIONS"){
-        string j_str = recd.substr(19);
+        string j_str = recd.substr(19   );
         json conds = json::parse(j_str);
-        for (const auto& status: conds){
-            cout<<status.get<int>()<<endl;
+        for (int i=0; i<comps.size(); i++){
+            comps[i]->setState(conds[i].get<int>());
         }
     }
 
@@ -74,6 +76,14 @@ void processInput(string& recd, bool& exit, std::vector<Component*>& comps, std:
 
 }
 
-string giveOutput(){
-    return "L bawt";
+string giveOutput(std::vector<shared_ptr<Component>>& comps){
+    json j;
+
+    std::vector<int> states;
+    states.reserve(comps.size());
+    for (auto & comp : comps){
+        states.push_back(comp->getState());
+    }
+    j["STATES"] = states;
+    return j.dump();
 }

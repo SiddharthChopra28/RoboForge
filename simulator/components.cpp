@@ -1,18 +1,13 @@
 #include "components.h"
 
-Pin::Pin(Component* pc, int _id){
+Pin::Pin(std::shared_ptr<Component> pc, int _id){
     parentComponent = pc;
     id = _id;
 }
 
-Component::~Component(){
-    for (int i=0; i<no_of_pins; i++){
-        delete pins[i];
-    }
-    delete[] pins;
-}
 
-DigitalPin::DigitalPin(Component* pc, int _id): Pin(pc, _id){
+
+DigitalPin::DigitalPin(std::shared_ptr<Component> pc, int _id): Pin(pc, _id){
     pinPotential = 0; //set it to 0 by default
     defaultPotential = 0;
     type = DIGITAL;
@@ -27,7 +22,7 @@ void DigitalPin::setPinPotential(float hl){
     pinPotential = hl;
 }
 
-DigitalPwmPin::DigitalPwmPin(Component* pc, int _id): Pin(pc, _id){
+DigitalPwmPin::DigitalPwmPin(std::shared_ptr<Component> pc, int _id): Pin(pc, _id){
     pinPotential = 0;
     defaultPotential = 0;
     type=DIGITALPWM;
@@ -41,7 +36,7 @@ void DigitalPwmPin::setPinPotential(float pp){
     pinPotential = pp;
 }
 
-AnalogPin::AnalogPin(Component* pc, int _id): Pin(pc, _id){
+AnalogPin::AnalogPin(std::shared_ptr<Component> pc, int _id): Pin(pc, _id){
     pinPotential = 0;
     defaultPotential = 0;
     type = ANALOG;
@@ -56,7 +51,7 @@ void AnalogPin::setPinPotential(float hl){
 }
 
 
-PowerPin::PowerPin(Component* pc, int _id): Pin(pc, _id){
+PowerPin::PowerPin(std::shared_ptr<Component> pc, int _id): Pin(pc, _id){
     type=POWER;
     if (id == PIN_R_GND || id == PIN_L_GND_1 || id == PIN_L_GND_2){
         pinPotential = 0;
@@ -111,38 +106,68 @@ void PowerPin::setPinPotential(float pp){
 
 Component::Component(int no_pins, float ov){
     no_of_pins = no_pins;
-    pins = new Pin*[no_of_pins];
+    pins.resize(no_pins);
     operatingVoltage = ov;
+}
+
+std::shared_ptr<Arduino> Arduino::create(int no_pins, float ov) {
+    auto instance = std::make_shared<Arduino>(no_pins, ov);
+    instance->initialize();
+    return instance;
 }
 
 
 Arduino::Arduino(int no_pins, float ov) : Component(no_pins, ov){
     analogReference = ov;
+}
+
+void Arduino::initialize() {
+    auto self= shared_from_this();
     for (int i=0; i<=13; i++){
         if (i==3 || i==5 || i==6 || i==9 || i==10 || i==11){
-            pins[i] = new DigitalPwmPin(this,i);
+            pins[i] = std::make_shared<DigitalPwmPin>(self, i);
         }
         else{
-            pins[i] = new DigitalPin(this,i);
+            pins[i] = std::make_shared<DigitalPin>(self, i);
         }
     }
     for (int i=14; i<=21; i++){
-        pins[i] = new AnalogPin(this, i);
+        pins[i] = std::make_shared<AnalogPin>(self, i);
     }
     for (int i=22; i<=32; i++){
-        pins[i] = new PowerPin(this, i);
+        pins[i] = std::make_shared<PowerPin>(self, i);
+    }
+}
+
+int Arduino::getState() {
+    // return 1 or 0 depending on the state of the led
+    if (pins[LED_BUILTIN]->mode == INPUT){
+        return 0;
+    }
+    if (pins[LED_BUILTIN]->getPinPotential() == HIGH*operatingVoltage){
+        return 1;
+    }
+    else{
+        return 0;
     }
 
 }
 
-void Component::connectPin(int pinid, Wire &wire) const {
-    Pin* pin = pins[pinid];
-    if (!wire.connectEnd(pin)){
+void Arduino::setState(int state) {
+    // do nothing
+}
+
+void Component::connectPin(int pinid, std::shared_ptr<Wire> wire) {
+
+    std::shared_ptr<Pin> pin = pins[pinid];
+
+    if (!wire->connectEnd(pin)){
         return;
     }
 
-    if (wire.get_no_ends_connected() == 2){
-        Pin*& otherpin = (wire.p1 == pin) ? wire.p2 : wire.p1;
+    if (wire->get_no_ends_connected() == 2){
+        std::shared_ptr<Pin> otherpin = (wire->p1 == pin) ? wire->p2 : wire->p1;
+
 
         if (pin->mode == OUTPUT){
             if (otherpin->mode == OUTPUT){
@@ -151,6 +176,7 @@ void Component::connectPin(int pinid, Wire &wire) const {
             }
             else if (otherpin->mode == INPUT){
                 otherpin->setPinPotential(pin->getPinPotential());
+
             }
             // there is also input_pullup mode??
         }
@@ -167,15 +193,15 @@ void Component::connectPin(int pinid, Wire &wire) const {
 
 }
 
-void Component::disconnectPin(int pinid, Wire &wire) const{
-    Pin* pin = pins[pinid];
+void Component::disconnectPin(int pinid, std::shared_ptr<Wire> wire) const{
+    std::shared_ptr pin = pins[pinid];
 
-    if (!wire.disconnectEnd(pin)){
+    if (!wire->disconnectEnd(pin)){
         return;
     }
 
-    if (wire.get_no_ends_connected() == 1){
-        Pin*& otherpin = (wire.p1 == nullptr) ? wire.p2 : wire.p1;
+    if (wire->get_no_ends_connected() == 1){
+        std::shared_ptr<Pin> otherpin = (wire->p1 == nullptr) ? wire->p2 : wire->p1;
 
         if (pin->mode == OUTPUT){
             if (otherpin->mode == OUTPUT){
@@ -198,16 +224,27 @@ void Component::disconnectPin(int pinid, Wire &wire) const{
 }
 
 
-IRSensor::IRSensor(int no_pins, float ov) : Component(no_pins, ov){
-    pins[PIN_IRSENSOR_VIN] = new PowerPin(this, PIN_IRSENSOR_VIN);
-    pins[PIN_IRSENSOR_GND] = new PowerPin(this, PIN_IRSENSOR_VIN);
-    pins[PIN_IRSENSOR_OUT] = new DigitalPin(this, PIN_IRSENSOR_VIN);
+IRSensor::IRSensor(int no_pins, float ov) : Component(no_pins, ov){}
+
+std::shared_ptr<IRSensor> IRSensor::create(int no_pins, float ov) {
+    auto instance = std::make_shared<IRSensor>(no_pins, ov);
+    instance->initialize();
+    return instance;
+}
+
+void IRSensor::initialize() {
+    auto self= shared_from_this();
+    pins[PIN_IRSENSOR_VIN] = std::make_shared<PowerPin>(self, PIN_IRSENSOR_VIN);
+    pins[PIN_IRSENSOR_GND] = std::make_shared<PowerPin>(self, PIN_IRSENSOR_GND);
+    pins[PIN_IRSENSOR_OUT] = std::make_shared<DigitalPin>(self, PIN_IRSENSOR_OUT);
+
     pins[PIN_IRSENSOR_VIN] -> mode = INPUT;
     pins[PIN_IRSENSOR_GND] -> mode = INPUT;
     pins[PIN_IRSENSOR_OUT] -> mode = OUTPUT;
 }
 
-bool IRSensor::getOutput() {
+int IRSensor::getState() {
+    // returns 1 or 0 depending upon whether there is an obstacle present
     if (pins[PIN_IRSENSOR_VIN]->getPinPotential() == operatingVoltage && pins[PIN_IRSENSOR_GND]->getPinPotential() == LOW){
         return obstacle;
     }
@@ -216,10 +253,41 @@ bool IRSensor::getOutput() {
     }
 }
 
-void IRSensor::setInput(bool s) {
-    obstacle = s;
+void IRSensor::setState(int state) {
+    obstacle = bool(state);
 }
 
+
+Led::Led(int no_pins, float ov):Component(no_pins, ov){}
+
+std::shared_ptr<Led> Led::create(int no_pins,float ov) {
+    auto instance = std::make_shared<Led>(no_pins, ov);
+    instance->initialize();
+    return instance;
+}
+
+void Led::initialize() {
+    auto self= shared_from_this();
+    pins[PIN_LED_POS] = std::make_shared<PowerPin>(self, PIN_LED_POS);
+    pins[PIN_LED_NEG] = std::make_shared<PowerPin>(self, PIN_LED_NEG);
+
+    pins[PIN_IRSENSOR_VIN] -> mode = INPUT;
+    pins[PIN_IRSENSOR_GND] -> mode = INPUT;
+}
+
+int Led::getState() {
+    // returns 1 or 0
+    if (pins[PIN_LED_POS]->getPinPotential() == operatingVoltage && pins[PIN_IRSENSOR_GND]->getPinPotential() == LOW) {
+        return HIGH;
+    }
+    else{
+        return LOW;
+    }
+}
+
+void Led::setState(int) {
+    // do nothing
+}
 
 int Wire::get_no_ends_connected() const {
     if (c1 == nullptr && c2 == nullptr) {
@@ -233,7 +301,7 @@ int Wire::get_no_ends_connected() const {
     }
 }
 
-bool Wire::connectEnd(Pin* pin) {
+bool Wire::connectEnd(std::shared_ptr<Pin> pin) {
     if (c1 != nullptr && c2 != nullptr){
         return false;
     }
@@ -244,20 +312,20 @@ bool Wire::connectEnd(Pin* pin) {
         p1 = pin;
         c1 = pin->parentComponent;
         pin->wireConnected = true;
-        pin->wire = this;
+        pin->wire = shared_from_this();
         return true;
     }
     else{
         p2 = pin;
         c2 = pin->parentComponent;
         pin->wireConnected = true;
-        pin->wire = this;
+        pin->wire = shared_from_this();
         return true;
     }
 }
 
 
-bool Wire::disconnectEnd(Pin* pin){
+bool Wire::disconnectEnd(std::shared_ptr<Pin> pin){
     if (p1 == pin){
         pin->wireConnected = false;
         pin->wire = nullptr;

@@ -12,12 +12,12 @@
 #include<typeinfo>
 using namespace std;
 
-void pinMode_(Arduino& ard, uint8_t pin, uint8_t mode);
-void digitalWrite_(Arduino& ard, uint8_t pin, uint8_t val);
-int digitalRead_(Arduino& ard, uint8_t pin);
-int analogRead_(Arduino& ard, uint8_t pin);
-void analogReference_(Arduino& ard, uint8_t mode);
-void analogWrite_(Arduino& ard, uint8_t pin, int val);
+void pinMode_(std::shared_ptr<Arduino> ard, uint8_t pin, uint8_t mode);
+void digitalWrite_(std::shared_ptr<Arduino> ard, uint8_t pin, uint8_t val);
+int digitalRead_(std::shared_ptr<Arduino> ard, uint8_t pin);
+int analogRead_(std::shared_ptr<Arduino> ard, uint8_t pin);
+void analogReference_(std::shared_ptr<Arduino> ard, uint8_t mode);
+void analogWrite_(std::shared_ptr<Arduino> ard, uint8_t pin, int val);
 
 //unsigned long pulseIn_(Arduino& ard, uint8_t pin, uint8_t state, unsigned long timeout);
 //unsigned long pulseInLong_(Arduino& ard, uint8_t pin, uint8_t state, unsigned long timeout);

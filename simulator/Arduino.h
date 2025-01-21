@@ -18,10 +18,12 @@
 
 #define empty()
 
-Arduino ard = Arduino(32,5);
+auto ard = Arduino::create(33, 5);
+
 hr_time_point start_time;
 HSerial Serial;
-std::vector<Component*> comps;
+
+std::vector<shared_ptr<Component>> comps;
 std::vector<shared_ptr<Wire>> wires;
 
 #define String string
@@ -104,7 +106,7 @@ std::vector<shared_ptr<Wire>> wires;
 #define NOT_A_PIN 0
 #define NOT_A_PORT 0
 
-#define NOT_AN_INTERRUPT -1
+#define NOT_AN_INTERRUPT (-1)
 
 #define PA 1
 #define PB 2
@@ -170,7 +172,6 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 static const uint8_t SDA = PIN_WIRE_SDA;
 static const uint8_t SCL = PIN_WIRE_SCL;
 
-#define LED_BUILTIN 13
 
 
 static const uint8_t A0 = PIN_A0;
