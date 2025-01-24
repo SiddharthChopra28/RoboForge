@@ -12,9 +12,9 @@ long long get_micros(hr_time_point& st){
     return ms.count();
 }
 
+
 void delay(long int ms){
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-    // OR better way to do this is: save starting time and check time in the main loop every N number of loops, and while the delay time is not done, do nothing
 }
 
 void delayMicroseconds(long int us){

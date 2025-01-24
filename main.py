@@ -1,7 +1,7 @@
 from json import JSONDecodeError
 
+
 from comps import *
-from ids import *
 from socks import Sock
 from ardparser import ardparser
 from PyQt5.QtWidgets import QApplication, QFileDialog
@@ -17,19 +17,21 @@ def open_file_dialog():
     return file_path
 
 prev_states = None
+stop_thread = False
 def process_input(sc):
-    while True:
+    while not stop_thread:
+        # print("i am runining")
         data = sc.receive_data()
-        print(data)
         try:
             data_dict = json.loads(data)
-        except JSONDecodeError:
+            states = data_dict["STATES"]
+            if states != prev_states:
+                for n, comp in enumerate(components):
+                    if comp.state != states[n]:
+                        comp.set_state(states[n])
+
+        except Exception:
             continue
-        states = data_dict["STATES"]
-        if states != prev_states:
-            for n, comp in enumerate(components):
-                if comp.state != states[n]:
-                    comp.set_state(states[n])
 
 
 
@@ -53,7 +55,6 @@ SIDEBAR_WIDTH = 320
 
 COMP = 0
 CODE = 1
-COND = 2
 
 WHITE = (255,255,255)
 GREY = (144, 147, 150)
@@ -89,44 +90,55 @@ active_pane = COMP
 titletext = font_ausa.render("RoboForge", True, WHITE)
 
 comp_t = font_lat.render("Components", True, (WHITE if active_pane == COMP else GREY))
-comp_t_rect = comp_t.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+17, HEIGHT//25+75))
+comp_t_rect = comp_t.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+35, HEIGHT//25+75))
 
-code_t = font_lat.render("Code", True, (WHITE if active_pane == CODE else GREY))
-code_t_rect = code_t.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//25+75))
+code_t = font_lat.render("Simulation", True, (WHITE if active_pane == CODE else GREY))
+code_t_rect = code_t.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+180, HEIGHT//25+75))
 
-cond_t = font_lat.render("Conditions", True, (WHITE if active_pane == COND else GREY))
-cond_t_rect = cond_t.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+207, HEIGHT//25+75))
+
+reset_button = font_rob.render("Reset", True, WHITE)
+reset_button_rect = reset_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//5))
 
 spawn_ir_button = font_rob.render("+ IR Sensor", True, WHITE)
-spawn_ir_button_rect = spawn_ir_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//5))
+spawn_ir_button_rect = spawn_ir_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//4))
 
 spawn_led_button = font_rob.render("+ LED", True, WHITE)
-spawn_led_button_rect = spawn_led_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//4))
+spawn_led_button_rect = spawn_led_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//3))
 
-upload_code_button = font_rob.render("Upload Code", True, WHITE)
+upload_code_button = font_rob.render("Select File", True, WHITE)
 upload_code_button_rect = upload_code_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//4))
 
 run_code_button = font_rob.render("Run Code", True, GREY)
 run_code_button_rect = run_code_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//3))
 
+stop_code_button = font_rob.render("Stop Code", True, WHITE)
+stop_code_button_rect = stop_code_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//3))
+
+comp_info_title = ""
+comp_info_text = ""
+comp_info_title_render = font_rob.render(comp_info_title, True, WHITE)
+comp_info_text_render = font_rob.render(comp_info_text, True, WHITE)
+
+
 code_status_text = font_rob.render("Upload code file", True, WHITE)
 
 editor_area = pygame.Rect(0,0,WIDTH-SIDEBAR_WIDTH, HEIGHT)
-
+comp_info_box = pygame.Rect(0, 0, 100, 50)
 
 wire_node1 = None
 
+show_comp_info_box = 0
+SHOW_COMP_LIMIT = 250
 running = True
 socket_connected = False
 editing_mode = True
-# sock = None
-sock = Sock()
+
+sock = None
 
 
-global_button_rects = [comp_t_rect, code_t_rect, cond_t_rect]
-comp_button_rects = [spawn_ir_button_rect, spawn_led_button_rect]
+global_button_rects = [comp_t_rect, code_t_rect]
+comp_button_rects = [reset_button_rect, spawn_ir_button_rect, spawn_led_button_rect]
 code_button_rects = [upload_code_button_rect]
-cond_button_rects = []
 visible_button_rects = global_button_rects+comp_button_rects
 
 socket_thread = None
@@ -135,14 +147,17 @@ while running:
     #define vars
     pane_switched = False
     # when user starts code running, sock object will be created. when user stops code running, sock is set to none
+
     if sock is not None:
         if not socket_connected:
             if sock.connect():
+                print("oui")
                 socket_connected = True
-                print("socket_connected")
                 circ_dict_json = json.dumps(make_circuit_dict())
+                print(circ_dict_json)
                 sock.send_msg(f"COMMAND:CIRCUIT:{circ_dict_json}")
                 cond_dict_json = json.dumps(make_cond_list())
+                print(cond_dict_json)
                 sock.send_msg(f"COMMAND:CONDITIONS:{cond_dict_json}")
                 socket_thread = Thread(target=process_input, args=(sock,), daemon=True)
                 socket_thread.start()
@@ -152,6 +167,13 @@ while running:
     # once when program starts about the setup of the circuit
     # if conditions are changed while the code is running
     # change in circuit is not allowed while the code is running
+
+    if show_comp_info_box > 0:
+        if show_comp_info_box < SHOW_COMP_LIMIT:
+            show_comp_info_box+=1
+        elif show_comp_info_box == SHOW_COMP_LIMIT:
+            show_comp_info_box = 0
+
 
 
     mouse_pos = pygame.mouse.get_pos()
@@ -171,6 +193,7 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             print(event.pos)
 
+
             if event.button == 1:
                 #check for dragging of components
                 for component in components.__reversed__():
@@ -183,6 +206,7 @@ while running:
             elif event.button == 3:
                 #check for wire attachment/detachment
                 if editing_mode:
+                    flag_broken = False
                     for component in components.__reversed__():
                         for node in component.nodes:
                             if node.rect.collidepoint(event.pos):
@@ -202,7 +226,10 @@ while running:
                                             wire_node1 = None
                                     else:
                                         wire_node1 = node
+                                flag_broken = True
                                 break
+
+                        if flag_broken: break
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -214,84 +241,115 @@ while running:
                         component.being_dragged = False
 
             # check for global buttons clicked
-            if comp_t_rect.collidepoint(event.pos):
-                active_pane = COMP
-                pane_switched = True
-                visible_button_rects = global_button_rects+comp_button_rects
+                if comp_t_rect.collidepoint(event.pos):
+                    active_pane = COMP
+                    pane_switched = True
+                    visible_button_rects = global_button_rects+comp_button_rects
 
 
-            elif code_t_rect.collidepoint(event.pos):
-                active_pane = CODE
-                pane_switched = True
-                visible_button_rects = global_button_rects+code_button_rects
-
-            elif cond_t_rect.collidepoint(event.pos):
-                active_pane = COND
-                pane_switched = True
-                visible_button_rects = global_button_rects+cond_button_rects
+                elif code_t_rect.collidepoint(event.pos):
+                    active_pane = CODE
+                    pane_switched = True
+                    visible_button_rects = global_button_rects+code_button_rects
 
             #change color of buttons when pane is switched
-            if pane_switched:
-                comp_t = font_lat.render("Components", True, (WHITE if active_pane == COMP else GREY))
-                code_t = font_lat.render("Code", True, (WHITE if active_pane == CODE else GREY))
-                cond_t = font_lat.render("Conditions", True, (WHITE if active_pane == COND else GREY))
+                if pane_switched:
+                    comp_t = font_lat.render("Components", True, (WHITE if active_pane == COMP else GREY))
+                    code_t = font_lat.render("Simulation", True, (WHITE if active_pane == CODE else GREY))
 
 
-            # check for conditional buttons
-            if active_pane == COMP:
-                # check for buttons
-                if editing_mode:
-                    if spawn_ir_button_rect.collidepoint(event.pos):
-                        ir = IRSensor()
-                        components.append(ir)
-                    elif spawn_led_button_rect.collidepoint(event.pos):
-                        led = Led()
-                        components.append(led)
+                # check for conditional buttons
+                if active_pane == COMP:
+                    # check for buttons
+                    if editing_mode:
+                        if reset_button_rect.collidepoint(event.pos):
+                            wires = []
+                            components = []
+                            ard_comp = Arduino()
+                            components.append(ard_comp)
+
+                        elif spawn_ir_button_rect.collidepoint(event.pos):
+                            ir = IRSensor()
+                            components.append(ir)
+                        elif spawn_led_button_rect.collidepoint(event.pos):
+                            led = Led()
+                            components.append(led)
 
 
-            elif active_pane == CODE:
-                #check for upload_code button
-                if upload_code_button_rect.collidepoint(event.pos):
-                    file = open_file_dialog()
-                    print(file.split("."))
-                    if file == "":
-                        code_status_text = font_rob.render("Upload code file", True, WHITE)
-                        code_file = None
-                        run_code_button = font_rob.render("Run Code", True, GREY)
-                        if run_code_button_rect in code_button_rects:
-                            code_button_rects.remove(run_code_button_rect)
-                        visible_button_rects = global_button_rects+code_button_rects
+
+                elif active_pane == CODE:
+                    if editing_mode:
+                    #check for upload_code button
+                        if upload_code_button_rect.collidepoint(event.pos):
+                            file = open_file_dialog()
+                            print(file.split("."))
+                            if file == "":
+                                code_status_text = font_rob.render("Upload code file", True, WHITE)
+                                code_file = None
+                                run_code_button = font_rob.render("Run Code", True, GREY)
+                                if run_code_button_rect in code_button_rects:
+                                    code_button_rects.remove(run_code_button_rect)
+                                visible_button_rects = global_button_rects+code_button_rects
 
 
-                    elif file.split(".")[-1] != "ino":
-                        code_status_text = font_rob.render("Unsupported file extension", True, WHITE)
-                        code_file = None
-                        run_code_button = font_rob.render("Run Code", True, GREY)
-                        if run_code_button_rect in code_button_rects:
-                            code_button_rects.remove(run_code_button_rect)
-                        visible_button_rects = global_button_rects+code_button_rects
+                            elif file.split(".")[-1] != "ino":
+                                code_status_text = font_rob.render("Unsupported file extension", True, WHITE)
+                                code_file = None
+                                run_code_button = font_rob.render("Run Code", True, GREY)
+                                if run_code_button_rect in code_button_rects:
+                                    code_button_rects.remove(run_code_button_rect)
+                                visible_button_rects = global_button_rects+code_button_rects
 
+
+                            else:
+                                code_status_text = font_rob.render("Code uploaded successfully", True, WHITE)
+                                code_file = file
+                                run_code_button = font_rob.render("Run Code", True, WHITE)
+                                if run_code_button_rect not in code_button_rects:
+                                    code_button_rects.append(run_code_button_rect)
+                                visible_button_rects = global_button_rects+code_button_rects
+
+
+                        # check for run_code button
+                        if run_code_button_rect.collidepoint(event.pos):
+                            if code_file:
+                                editing_mode = False
+                                stop_thread = False
+                                sock = Sock()
+                                print("hheiieji")
+                                ardparser(code_file, sock.PORT)
 
                     else:
-                        code_status_text = font_rob.render("Code uploaded successfully", True, WHITE)
-                        code_file = file
-                        run_code_button = font_rob.render("Run Code", True, WHITE)
-                        if run_code_button_rect not in code_button_rects:
-                            code_button_rects.append(run_code_button_rect)
-                        visible_button_rects = global_button_rects+code_button_rects
+                        if stop_code_button_rect.collidepoint(event.pos):
+                            sock.send_msg(f"COMMAND:EXIT:")
+                            stop_thread = True
+                            sock.end_sock()
+                            socket_thread.join()
+                            sock = None
+                            socket_connected = False
+                            socket_thread = None
+                            editing_mode = True
 
 
-            # check for run_code button
-                if run_code_button_rect.collidepoint(event.pos):
-                    if code_file:
-                        editing_mode = False
-                        ardparser(code_file)
 
 
-            elif active_pane == COND:
-                pass
+        elif event.type == pygame.MOUSEWHEEL:
+            showing_data = None # [title, string]
+            if event.y == 1 or event.y == -1:
+                for n, comp in enumerate(components.__reversed__()):
+                    if comp.rect.collidepoint(mouse_pos):
+                        showing_data = comp.handle_scroll(event.y)
+                        break
 
-
+                if showing_data:
+                    show_comp_info_box = 1
+                    comp_info_box.x, comp_info_box.y = mouse_pos
+                    comp_info_title = showing_data[0]
+                    comp_info_text = showing_data[1]
+                    comp_info_title_render = font_lat.render(comp_info_title, True, WHITE)
+                    comp_info_text_render = font_lat.render(comp_info_text, True, WHITE)
+                    if sock is not None and socket_connected:
+                        sock.send_msg(f"COMMAND:CONDITIONS:{json.dumps(make_cond_list())}")
 
 
     # dragging procedure
@@ -310,7 +368,6 @@ while running:
 
 
     # rendering
-
     window.fill(SIDEBARBG)
     pygame.draw.rect(window, EDITORBG, editor_area)
 
@@ -318,12 +375,10 @@ while running:
     pygame.draw.line(window, WHITE, (WIDTH-SIDEBAR_WIDTH+15, HEIGHT//25+70), (WIDTH-15, HEIGHT//25+70)) # seperator line
 
     window.blit(comp_t, comp_t_rect.topleft)
-    pygame.draw.line(window, WHITE, (WIDTH-SIDEBAR_WIDTH+136, HEIGHT//25+78), (WIDTH-SIDEBAR_WIDTH+136, HEIGHT//25+102)) # seperator line
+    pygame.draw.line(window, WHITE, (WIDTH-SIDEBAR_WIDTH+161, HEIGHT//25+78), (WIDTH-SIDEBAR_WIDTH+161, HEIGHT//25+102)) # seperator line
 
     window.blit(code_t, code_t_rect.topleft)
-    pygame.draw.line(window, WHITE, (WIDTH-SIDEBAR_WIDTH+197, HEIGHT//25+78), (WIDTH-SIDEBAR_WIDTH+197, HEIGHT//25+102)) # seperator line
 
-    window.blit(cond_t, cond_t_rect.topleft)
 
     pygame.draw.line(window, WHITE, (WIDTH-SIDEBAR_WIDTH+15, HEIGHT//25+110), (WIDTH-15, HEIGHT//25+110)) # seperator line
 
@@ -331,14 +386,17 @@ while running:
     if active_pane == COMP:
         window.blit(spawn_ir_button, spawn_ir_button_rect.topleft)
         window.blit(spawn_led_button, spawn_led_button_rect.topleft)
+        window.blit(reset_button, reset_button_rect.topleft)
 
     elif active_pane == CODE:
         window.blit(upload_code_button, upload_code_button_rect.topleft)
-        window.blit(run_code_button, run_code_button_rect.topleft)
-        window.blit(code_status_text, (WIDTH-SIDEBAR_WIDTH, HEIGHT//5))
 
-    elif active_pane == COND:
-        pass
+        window.blit(code_status_text, (WIDTH-SIDEBAR_WIDTH+50, HEIGHT//5))
+        if editing_mode:
+            window.blit(run_code_button, run_code_button_rect.topleft)
+        else:
+            window.blit(stop_code_button, stop_code_button_rect.topleft)
+
 
     for component in components:
         component.rect.clamp_ip(editor_area)
@@ -351,9 +409,12 @@ while running:
     for wire in wires:
         pygame.draw.line(window, RED, wire.node1.rect.center, wire.node2.rect.center, width=3)
 
-    # led_comp.add_node(-5, 56, 8, 8, PIN_LED_POS)
-    # led_comp.add_node(13, 49, 8, 8, PIN_LED_NEG)
+    if show_comp_info_box>0:
+        pygame.draw.rect(window, WHITE, comp_info_box, border_radius = 2)
+        pygame.draw.rect(window, SIDEBARBG, comp_info_box.inflate(-2, -2), border_radius=2)
 
+        window.blit(comp_info_title_render, (comp_info_box.x+10, comp_info_box.y+6))
+        window.blit(comp_info_text_render, (comp_info_box.x+15, comp_info_box.y+25))
 
 
     pygame.display.flip()

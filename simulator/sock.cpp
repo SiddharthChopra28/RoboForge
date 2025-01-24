@@ -1,5 +1,5 @@
 #include "sock.h"
-
+#include "fstream"
 #if __linux__
 
 Socket::Socket(string ip, int port){
@@ -13,19 +13,18 @@ Socket::Socket(string ip, int port){
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
     inet_pton(AF_INET, ip.c_str(), &serverAddress.sin_addr);
+
     while (1) {
         if (connect(sock, (sockaddr*)&serverAddress, sizeof(serverAddress)) != -1){
             break;
         }
+
     }
 
     fcntl(sock, F_SETFL, O_NONBLOCK);
 
 }
 
-Socket::~Socket(){
-    close(sock);
-}
 
 string Socket::getMessage() {
     char buffer[1024] = {0};

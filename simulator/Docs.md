@@ -1,6 +1,8 @@
-# List of supported features in the language
+# unoffical docs
 
-IMP: need to have xterm and g++ installed on linux  
+things to add: serial output & input, breadboard, temperature sensor, dc motor
+
+IMP: need to have g++ installed on linux  
 
 some rules for the board:  
 take default operating voltage = 5V  

@@ -5,10 +5,6 @@ WIDTH = 1400
 HEIGHT = 800
 
 
-
-
-
-
 class Node:
     """parent rect, offsets from center of parent rect"""
     def __init__(self, parent_rect, offset_x, offset_y, width, height, node_id, parent_comp):
@@ -94,6 +90,10 @@ class Arduino(Component):
     def get_state(self):
         return self.state
 
+    def handle_scroll(self, y):
+        # do nothing
+        return None
+
 
 class IRSensor(Component):
     def __init__(self):
@@ -116,6 +116,10 @@ class IRSensor(Component):
     def get_state(self):
         return self.state
 
+    def handle_scroll(self, y):
+        self.state = not self.state
+        return ["IR Sensor", "ON" if self.state else "OFF"]
+
 class Led(Component):
     def __init__(self):
         led_img_on = pygame.image.load("./assets/led_on.png").convert_alpha()
@@ -135,10 +139,11 @@ class Led(Component):
             self.image = self.off_img
 
         self.state = state
-        center_coords = self.rect.center
-        self.rect = self.image.get_rect()
-        self.rect.center = center_coords
 
 
     def get_state(self):
         return self.state
+
+    def handle_scroll(self, y):
+        # do nothing
+        return None

@@ -71,6 +71,7 @@ void digitalWrite_(std::shared_ptr<Arduino> ard, uint8_t pin, uint8_t val){
         if (val == HIGH){
             ard->pins[pin]->defaultPotential = HIGH*ard->operatingVoltage;
             ard->pins[pin]->setPinPotential(HIGH*ard->operatingVoltage);
+            ard->pins[pin]->update_potential();
         }
         else if (val == LOW){
             ard->pins[pin]->defaultPotential = LOW;
@@ -78,9 +79,13 @@ void digitalWrite_(std::shared_ptr<Arduino> ard, uint8_t pin, uint8_t val){
     }
     else if (ard->pins[pin]->mode == INPUT_PULLUP){
         ard->pins[pin]->setPinPotential(HIGH*ard->operatingVoltage);
+        ard->pins[pin]->update_potential();
+
     }
     else if (ard->pins[pin]->mode == OUTPUT){
-        ard->pins[pin]->setPinPotential(float(val)*ard->operatingVoltage);
+        ard->pins[pin]->setPinPotential(float(val)*(ard->operatingVoltage));
+        ard->pins[pin]->update_potential();
+
     }
 }
 
@@ -88,6 +93,8 @@ void analogWrite_(std::shared_ptr<Arduino> ard, uint8_t pin, int val){
     if (ard->pins[pin]->type == DIGITALPWM){
         if (ard->pins[pin]->type == OUTPUT){ //only works if pin is in output mode
             ard->pins[pin]->setPinPotential(float(val)/255.f*ard->operatingVoltage);
+            ard->pins[pin]->update_potential();
+
         }
     }
     else{

@@ -1,12 +1,16 @@
 import socket
+import random
 
 class Sock:
     def __init__(self):
         self.HOST = '127.0.0.1'
-        self.PORT = 8080
+        self.PORT = random.randint(1000, 9999)
+        print(self.PORT)
 
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         self.server_socket.bind((self.HOST, self.PORT))
+
         self.server_socket.listen(1)
         self.server_socket.setblocking(False)
 
@@ -17,7 +21,7 @@ class Sock:
         try:
             self.client_socket, self.client_address = self.server_socket.accept()
             return True
-        except BlockingIOError:
+        except Exception:
             return False
 
 
@@ -27,7 +31,7 @@ class Sock:
             data = self.client_socket.recv(1024).decode()
             if data:
                 return data
-        except BlockingIOError:
+        except Exception:
             pass
             return None
 
@@ -35,23 +39,11 @@ class Sock:
         try:
             self.client_socket.sendall(msg.encode('utf-8'))
             return True
-        except BlockingIOError:
+        except Exception:
             return False
 
 
     def end_sock(self):
+        self.client_socket.shutdown(socket.SHUT_RDWR)
         self.client_socket.close()
-
-# if __name__ == "__main__":
-#     x = 0
-#     sock = Sock()
-#     while not sock.connect():
-#         pass
-#
-#     while True:
-#         x+=1
-#         print(x)
-#         sock.send_msg("Hi from python")
-#         print(sock.receive_data())
-
 

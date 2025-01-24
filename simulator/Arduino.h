@@ -23,8 +23,11 @@ auto ard = Arduino::create(33, 5);
 hr_time_point start_time;
 HSerial Serial;
 
+
 std::vector<shared_ptr<Component>> comps;
 std::vector<shared_ptr<Wire>> wires;
+
+bool sleeping = false;
 
 #define String string
 // both are not the same but do this temporarily
@@ -41,6 +44,9 @@ std::vector<shared_ptr<Wire>> wires;
 
 #define attachInterrupt(a, b, c) attchInterrupt_(ard, a, b, c)
 #define detachInterrupt(a) detachInterrupt_(ard, a)
+
+#define delay(a) send_msg(); delay(a); send_msg()
+#define delayMicroseconds(a) send_msg(); delayMicroseconds(a); send_msg();
 
 #define HIGH 1
 #define LOW  0

@@ -19,6 +19,7 @@ void processInput(string& recd, bool& exit, std::vector<shared_ptr<Component>>& 
         cmd+=recd[i];
     }
 
+
     if (cmd == "CIRCUIT"){
         string j_str = recd.substr(16);
         json circuit;
@@ -47,7 +48,7 @@ void processInput(string& recd, bool& exit, std::vector<shared_ptr<Component>>& 
 
         }
         catch(json::parse_error&){}
-//        try{
+        try{
             for (const auto& conn: circuit["CONNECTIONS"]){
                 wires.push_back(make_shared<Wire>());
 
@@ -57,17 +58,23 @@ void processInput(string& recd, bool& exit, std::vector<shared_ptr<Component>>& 
             }
 
             cout<<"done";
-//        }
-//        catch (json::parse_error){}
+        }
+        catch (json::parse_error&){}
     }
 
     else if (cmd == "CONDITIONS"){
-        string j_str = recd.substr(19   );
-        json conds = json::parse(j_str);
-        for (int i=0; i<comps.size(); i++){
-            comps[i]->setState(conds[i].get<int>());
+        try {
+            string j_str = recd.substr(19);
+            json conds = json::parse(j_str);
+            for (int i = 0; i < comps.size(); i++) {
+                comps[i]->setState(conds[i].get<int>());
+
+            }
         }
+            catch(json::parse_error&){}
+
     }
+
 
     else if (cmd == "EXIT"){
         exit = true;

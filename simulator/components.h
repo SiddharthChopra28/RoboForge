@@ -92,7 +92,7 @@ public:
     void connectPin(int pinid, std::shared_ptr<Wire> wire);
     void disconnectPin(int pinid, std::shared_ptr<Wire> wire) const;
     virtual int getState()=0;
-    virtual void setState(int);
+    virtual void setState(int)=0;
 
 };
 
@@ -128,6 +128,10 @@ public:
 
 };
 
+class BreadBoard: public Component{
+    BreadBoard();
+};
+
 
 class Pin : public std::enable_shared_from_this<Pin>{
 public:
@@ -144,6 +148,8 @@ public:
     virtual float getPinPotential() = 0; // returns voltage of the pin
 
     virtual void setPinPotential(float) = 0;
+
+    void update_potential();
 
     float defaultPotential;
     float pinPotential;

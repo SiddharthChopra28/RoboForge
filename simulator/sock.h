@@ -11,13 +11,12 @@ using namespace std;
 #include <sys/select.h>
 
 class Socket{
+public:
     int sock;
     fd_set read_fds;
-public:
     Socket(string ip, int port);
     void sendMessage(string message);
     string getMessage();
-    ~Socket();
 };
 
 #elif _WIN32

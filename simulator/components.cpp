@@ -5,6 +5,35 @@ Pin::Pin(std::shared_ptr<Component> pc, int _id){
     id = _id;
 }
 
+void Pin::update_potential() {
+    if (!wireConnected){return;}
+    if (wire->get_no_ends_connected() != 2) {
+        return;
+    }
+
+    std::shared_ptr<Pin> otherpin = (wire->p1 == shared_from_this()) ? wire->p2 : wire->p1;
+
+    if (mode == OUTPUT){
+        if (otherpin->mode == OUTPUT){
+            // what to do??
+            return;
+        }
+        else if (otherpin->mode == INPUT){
+            otherpin->setPinPotential(getPinPotential());
+
+        }
+        // there is also input_pullup mode??
+    }
+    else if(mode == INPUT) {
+        if (otherpin->mode == INPUT) {
+            return; //what to do?
+        }
+        else if (otherpin->mode == OUTPUT) {
+            setPinPotential(otherpin->getPinPotential());
+        }
+    }
+
+}
 
 
 DigitalPin::DigitalPin(std::shared_ptr<Component> pc, int _id): Pin(pc, _id){
@@ -166,28 +195,7 @@ void Component::connectPin(int pinid, std::shared_ptr<Wire> wire) {
     }
 
     if (wire->get_no_ends_connected() == 2){
-        std::shared_ptr<Pin> otherpin = (wire->p1 == pin) ? wire->p2 : wire->p1;
-
-
-        if (pin->mode == OUTPUT){
-            if (otherpin->mode == OUTPUT){
-                // what to do??
-                return;
-            }
-            else if (otherpin->mode == INPUT){
-                otherpin->setPinPotential(pin->getPinPotential());
-
-            }
-            // there is also input_pullup mode??
-        }
-        else if(pin->mode == INPUT) {
-            if (otherpin->mode == INPUT) {
-                return; //what to do?
-            }
-            else if (otherpin->mode == OUTPUT) {
-                pin->setPinPotential(otherpin->getPinPotential());
-            }
-        }
+        pin->update_potential();
     }
 
 
@@ -255,6 +263,8 @@ int IRSensor::getState() {
 
 void IRSensor::setState(int state) {
     obstacle = bool(state);
+    pins[PIN_IRSENSOR_OUT]->setPinPotential(getState());
+    pins[PIN_IRSENSOR_OUT]->update_potential();
 }
 
 
