@@ -32,7 +32,6 @@ def open_file_dialog():
 stop_thread = False
 def process_input(sc):
     while not stop_thread:
-        # print("i am runining")
         data = sc.receive_data()
         try:
             data_dict = json.loads(data)
@@ -169,13 +168,10 @@ while running:
     if sock is not None:
         if not socket_connected:
             if sock.connect():
-                print("oui")
                 socket_connected = True
                 circ_dict_json = json.dumps(make_circuit_dict())
-                print(circ_dict_json)
                 sock.send_msg(f"COMMAND:CIRCUIT:{circ_dict_json}")
                 cond_dict_json = json.dumps(make_cond_list())
-                print(cond_dict_json)
                 sock.send_msg(f"COMMAND:CONDITIONS:{cond_dict_json}")
                 socket_thread = Thread(target=process_input, args=(sock,), daemon=True)
                 socket_thread.start()
@@ -209,7 +205,6 @@ while running:
 
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            print(event.pos)
 
 
             if event.button == 1:
@@ -303,7 +298,6 @@ while running:
                     #check for upload_code button
                         if upload_code_button_rect.collidepoint(event.pos):
                             file = open_file_dialog()
-                            print(file.split("."))
                             if file == "":
                                 code_status_text = font_rob.render("Upload code file", True, WHITE)
                                 code_file = None

@@ -1,6 +1,6 @@
 #include "Arduino.h"
 
-Socket sock = Socket("127.0.0.1", 4420);
+Socket sock = Socket("127.0.0.1", 7814);
 
 void send_msg(){
     static string prev;
@@ -14,12 +14,22 @@ void send_msg(){
 
 }
 
+int led = LED_BUILTIN;
+int led2 = 10;
+
 void setup(){
-    Serial.begin(9600);
+    pinMode(led, OUTPUT);
+    pinMode(led2, OUTPUT);
 }
 
 void loop(){
-    Serial.println("Helloowowowowow");
+    digitalWrite(led, HIGH);
+    digitalWrite(led2, LOW);
+    delay(1000);
+    digitalWrite(led, LOW);
+    digitalWrite(led2, HIGH);
+    delay(1000);
+
 }
 
 int main(){

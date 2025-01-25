@@ -22,3 +22,5 @@ To toggle / change the state / reading of any sensor, scroll on it with your mou
 
 Do not close the terminal window that pops up after running the code, or it will cause the simulator to stop.
 
+If there is error in user code, it will cause compilation to fail and will show error in the python console  
+
