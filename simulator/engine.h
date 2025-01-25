@@ -11,6 +11,6 @@ using json = nlohmann::json;
 
 void processInput(string& recd, bool& exit, std::vector<std::shared_ptr<Component>>& comps, std::vector<shared_ptr<Wire>>& wires, std::shared_ptr<Arduino> ard);
 
-string giveOutput(std::vector<shared_ptr<Component>>& comps);
+void giveOutput(std::vector<shared_ptr<Component>>& comps, json& j);
 
 #endif

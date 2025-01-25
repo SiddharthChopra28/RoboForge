@@ -168,7 +168,7 @@ void Arduino::initialize() {
     }
 }
 
-int Arduino::getState() {
+float Arduino::getState() {
     // return 1 or 0 depending on the state of the led
     if (pins[LED_BUILTIN]->mode == INPUT){
         return 0;
@@ -182,7 +182,7 @@ int Arduino::getState() {
 
 }
 
-void Arduino::setState(int state) {
+void Arduino::setState(float state) {
     // do nothing
 }
 
@@ -226,7 +226,6 @@ void Component::disconnectPin(int pinid, std::shared_ptr<Wire> wire) const{
             }
         }
     }
-
 }
 
 
@@ -249,7 +248,7 @@ void IRSensor::initialize() {
     pins[PIN_IRSENSOR_OUT] -> mode = OUTPUT;
 }
 
-int IRSensor::getState() {
+float IRSensor::getState() {
     // returns 1 or 0 depending upon whether there is an obstacle present
     if (pins[PIN_IRSENSOR_VIN]->getPinPotential() == operatingVoltage && pins[PIN_IRSENSOR_GND]->getPinPotential() == LOW){
         return obstacle;
@@ -259,9 +258,9 @@ int IRSensor::getState() {
     }
 }
 
-void IRSensor::setState(int state) {
+void IRSensor::setState(float state) {
     obstacle = bool(state);
-    pins[PIN_IRSENSOR_OUT]->setPinPotential(getState());
+    pins[PIN_IRSENSOR_OUT]->setPinPotential(float(getState())*operatingVoltage);
     pins[PIN_IRSENSOR_OUT]->update_potential();
 }
 
@@ -283,7 +282,7 @@ void Led::initialize() {
     pins[PIN_IRSENSOR_GND] -> mode = INPUT;
 }
 
-int Led::getState() {
+float Led::getState() {
     // returns 1 or 0
     if (pins[PIN_LED_POS]->getPinPotential() == operatingVoltage && pins[PIN_IRSENSOR_GND]->getPinPotential() == LOW) {
         return HIGH;
@@ -293,7 +292,7 @@ int Led::getState() {
     }
 }
 
-void Led::setState(int) {
+void Led::setState(float) {
     // do nothing
 }
 
@@ -317,7 +316,6 @@ int Wire::get_no_ends_connected() const {
 //}
 
 TempSensor::TempSensor(int no_pins, float ov) : Component(no_pins, ov){
-    // do nothing
 }
 
 std::shared_ptr<TempSensor> TempSensor::create(int no_pins, float ov){
@@ -335,15 +333,22 @@ void TempSensor::initialize() {
     pins[PIN_TEMPSENS_VCC] -> mode = INPUT;
     pins[PIN_TEMPSENS_OUT] -> mode = OUTPUT;
     pins[PIN_TEMPSENS_GND] -> mode = INPUT;
-
 }
 
-int TempSensor::getState() {
-
+float TempSensor::getState() {
+    if (pins[PIN_TEMPSENS_VCC]->getPinPotential() == operatingVoltage && pins[PIN_TEMPSENS_GND]->getPinPotential() == LOW){
+        return temp;
+    }
+    else{
+        return 0;
+    }
 }
 
-void TempSensor::setState(int) {
-    
+void TempSensor::setState(float t) {
+    // temperature in degree celcius is recevied
+    temp = t;
+    pins[PIN_TEMPSENS_OUT]->setPinPotential(getState()/100.f*operatingVoltage);
+    pins[PIN_TEMPSENS_OUT]->update_potential();
 }
 
 bool Wire::connectEnd(std::shared_ptr<Pin> pin) {
@@ -370,6 +375,7 @@ bool Wire::connectEnd(std::shared_ptr<Pin> pin) {
 }
 
 
+
 bool Wire::disconnectEnd(std::shared_ptr<Pin> pin){
     if (p1 == pin){
         pin->wireConnected = false;
@@ -388,5 +394,4 @@ bool Wire::disconnectEnd(std::shared_ptr<Pin> pin){
     }
     return false;
 }
-
 

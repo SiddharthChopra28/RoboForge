@@ -1,5 +1,8 @@
 #include "hserial.h"
 
+void HSerial::begin(unsigned long) {}
+
+void HSerial::end() {}
 
 
 void HSerial::flush(){

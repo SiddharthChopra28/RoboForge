@@ -43,6 +43,9 @@ void processInput(string& recd, bool& exit, std::vector<shared_ptr<Component>>& 
                     case (LED):
                         comps.push_back(Led::create(2, 5));
                         break;
+                    case (TEMPSENSOR):
+                        comps.push_back(TempSensor::create(3, 5));
+                        break;
                 }
             }
 
@@ -54,10 +57,8 @@ void processInput(string& recd, bool& exit, std::vector<shared_ptr<Component>>& 
 
                 comps[conn[0][0].get<int>()]->connectPin(conn[0][1].get<int>(),  wires.back());
                 comps[conn[1][0].get<int>()]->connectPin(conn[1][1].get<int>(),  wires.back());
-                cout<<"OK"<<endl;
             }
 
-            cout<<"done";
         }
         catch (json::parse_error&){}
     }
@@ -67,7 +68,7 @@ void processInput(string& recd, bool& exit, std::vector<shared_ptr<Component>>& 
             string j_str = recd.substr(19);
             json conds = json::parse(j_str);
             for (int i = 0; i < comps.size(); i++) {
-                comps[i]->setState(conds[i].get<int>());
+                comps[i]->setState(conds[i].get<float>());
 
             }
         }
@@ -83,14 +84,11 @@ void processInput(string& recd, bool& exit, std::vector<shared_ptr<Component>>& 
 
 }
 
-string giveOutput(std::vector<shared_ptr<Component>>& comps){
-    json j;
-
+void giveOutput(std::vector<shared_ptr<Component>>& comps, json& j){
     std::vector<int> states;
     states.reserve(comps.size());
     for (auto & comp : comps){
         states.push_back(comp->getState());
     }
     j["STATES"] = states;
-    return j.dump();
 }

@@ -23,6 +23,7 @@ auto ard = Arduino::create(33, 5);
 hr_time_point start_time;
 HSerial Serial;
 
+json container;
 
 std::vector<shared_ptr<Component>> comps;
 std::vector<shared_ptr<Wire>> wires;

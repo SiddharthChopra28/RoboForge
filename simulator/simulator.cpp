@@ -1,37 +1,25 @@
 #include "Arduino.h"
 
-Socket sock = Socket("127.0.0.1", 5613);
+Socket sock = Socket("127.0.0.1", 4420);
 
 void send_msg(){
     static string prev;
-    string o = giveOutput(comps);
-    if (prev == o){
+    giveOutput(comps, container);
+    if (prev == container.dump()){
         return;
     }
-    sock.sendMessage(o);
-    prev = o;
+    sock.sendMessage(container.dump());
+    prev = container.dump();
+    container.clear();
+
 }
-int led = 11;
-int led2 = 10;
-int ir = 4;
 
 void setup(){
-    pinMode(led, OUTPUT);
-    pinMode(led2, OUTPUT);
-    pinMode(ir, INPUT);
+    Serial.begin(9600);
 }
 
 void loop(){
-    bool ir_reading = digitalRead(ir);
-    if (ir_reading){
-        digitalWrite(led, HIGH);
-        digitalWrite(led2, HIGH);
-    }
-    else{
-        digitalWrite(led, LOW);
-        digitalWrite(led2, HIGH);
-    }
-
+    Serial.println("Helloowowowowow");
 }
 
 int main(){
@@ -50,13 +38,14 @@ int main(){
             loop();
         }
         send_msg();
+        cout<<std::flush;
+
     }
 
     shutdown(sock.sock, SHUT_RDWR);
     close(sock.sock);
 
 }
-
 
 
 

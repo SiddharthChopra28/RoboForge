@@ -159,7 +159,7 @@ class TempSensor(Component):
         
         self.add_node(-28, 80, 8, 8, PIN_TEMPSENS_VCC)
         self.add_node(0, 80, 8, 8, PIN_TEMPSENS_OUT)
-        self.add_node(29, 80, 8, 8, PIN_TEMPSENS_OUT)
+        self.add_node(29, 80, 8, 8, PIN_TEMPSENS_GND)
 
     # self.add_node()
 
@@ -170,9 +170,9 @@ class TempSensor(Component):
         return self.temp
 
     def handle_scroll(self, y):
-        if y == 1 and self.temp<150:
+        if y == 1 and self.temp<100:
             self.temp += 0.5
-        elif y == -1 and self.temp>-55:
+        elif y == -1 and self.temp>0:
             self.temp -= 0.5
 
         return ["Temp. Sen.", str(self.temp)]

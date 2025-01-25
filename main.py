@@ -1,13 +1,11 @@
 from json import JSONDecodeError
 
-
 from comps import *
 from socks import Sock
 from ardparser import ardparser
 from PyQt5.QtWidgets import QApplication, QFileDialog
 import json
 from threading import Thread
-
 
 def open_file_dialog():
     app = QApplication([])
@@ -16,7 +14,21 @@ def open_file_dialog():
     app.exit()
     return file_path
 
-prev_states = None
+
+# terminal_window_opened = False
+# terminal_window_thread = None
+# def make_terminal_window():
+#     app = QApplication([])
+#     console = QWidget()
+#     console.setWindowTitle("Serial Monitor")
+#     label = QLabel("Hello, this is some text in a new window!")
+#     label.setWordWrap(True)  # Enable text wrapping
+#     label.setAlignment(Qt.AlignmentFlag.AlignCenter) #Center the text
+#     console.show()
+#     app.exec()
+
+
+
 stop_thread = False
 def process_input(sc):
     while not stop_thread:
@@ -25,14 +37,11 @@ def process_input(sc):
         try:
             data_dict = json.loads(data)
             states = data_dict["STATES"]
-            if states != prev_states:
-                for n, comp in enumerate(components):
-                    if comp.state != states[n]:
-                        comp.set_state(states[n])
-
-        except Exception:
-            continue
-
+            for n, comp in enumerate(components):
+                if comp.state != states[n]:
+                    comp.set_state(states[n])
+        except:
+            pass
 
 
 def make_circuit_dict():
@@ -117,6 +126,10 @@ run_code_button_rect = run_code_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144
 stop_code_button = font_rob.render("Stop Code", True, WHITE)
 stop_code_button_rect = stop_code_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//3))
 
+gppnotfound_text = font_rob.render("g++ not found", True, WHITE)
+
+xtermnotfound_text = font_rob.render("xterm not found", True, WHITE)
+
 comp_info_title = ""
 comp_info_text = ""
 comp_info_title_render = font_rob.render(comp_info_title, True, WHITE)
@@ -135,6 +148,8 @@ SHOW_COMP_LIMIT = 250
 running = True
 socket_connected = False
 editing_mode = True
+gppnotfound = False
+xtermnotfound = False
 
 sock = None
 
@@ -319,13 +334,20 @@ while running:
                         # check for run_code button
                         if run_code_button_rect.collidepoint(event.pos):
                             if code_file:
-                                editing_mode = False
-                                stop_thread = False
                                 sock = Sock()
-                                print("hheiieji")
-                                ardparser(code_file, sock.PORT)
+                                res = ardparser(code_file, sock.PORT)
+                                if res == 1:
+                                    gppnotfound = True
+                                elif res == 2:
+                                    xtermnotfound = True
+                                elif res == 0:
+                                    gppnotfound = False
+                                    xtermnotfound = False
+                                    editing_mode = False
+                                    stop_thread = False
 
-                    else:
+
+                else:
                         if stop_code_button_rect.collidepoint(event.pos):
                             sock.send_msg(f"COMMAND:EXIT:")
                             stop_thread = True
@@ -335,6 +357,7 @@ while running:
                             socket_connected = False
                             socket_thread = None
                             editing_mode = True
+
 
 
 
@@ -404,6 +427,11 @@ while running:
         else:
             window.blit(stop_code_button, stop_code_button_rect.topleft)
 
+        if gppnotfound:
+            window.blit(gppnotfound_text, (WIDTH-SIDEBAR_WIDTH+120, HEIGHT//3+50))
+        if xtermnotfound:
+            window.blit(xtermnotfound_text, (WIDTH-SIDEBAR_WIDTH+120, HEIGHT//3+100))
+
 
     for component in components:
         component.rect.clamp_ip(editor_area)
@@ -422,6 +450,7 @@ while running:
 
         window.blit(comp_info_title_render, (comp_info_box.x+10, comp_info_box.y+6))
         window.blit(comp_info_text_render, (comp_info_box.x+15, comp_info_box.y+25))
+
 
 
     pygame.display.flip()

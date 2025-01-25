@@ -11,6 +11,7 @@ using namespace std;
 #define ARDUINO 0
 #define IR 1
 #define LED 2
+#define TEMPSENSOR 3
 
 // pin ids
 #define PIN_D0 0
@@ -95,8 +96,8 @@ public:
     Component(int no_pins, float opVol);
     void connectPin(int pinid, std::shared_ptr<Wire> wire);
     void disconnectPin(int pinid, std::shared_ptr<Wire> wire) const;
-    virtual int getState()=0;
-    virtual void setState(int)=0;
+    virtual float getState()=0;
+    virtual void setState(float)=0;
 
 };
 
@@ -104,8 +105,8 @@ class IRSensor: public Component{
 public:
     IRSensor(int no_pins, float ov);
     bool obstacle=false;
-    int getState() override;
-    void setState(int) override;
+    float getState() override;
+    void setState(float) override;
     static std::shared_ptr<IRSensor> create(int no_pins, float ov);
     void initialize();
 
@@ -118,8 +119,8 @@ public:
     static std::shared_ptr<Arduino> create(int no_pins, float ov);
     void initialize();
     float analogReference;
-    int getState() override;
-    void setState(int) override;
+    float getState() override;
+    void setState(float) override;
 };
 
 class Led: public Component{
@@ -127,8 +128,8 @@ public:
     Led(int no_pins, float ov);
     static std::shared_ptr<Led> create(int no_pins, float ov);
     void initialize();
-    int getState() override;
-    void setState(int) override;
+    float getState() override;
+    void setState(float) override;
 
 };
 
@@ -146,8 +147,9 @@ public:
     TempSensor(int no_pins, float ov);
     static std::shared_ptr<TempSensor> create(int no_pins, float ov);
     void initialize();
-    int getState() override;
-    void setState(int) override;
+    float temp=25;
+    float getState() override;
+    void setState(float) override;
 
 
 };
