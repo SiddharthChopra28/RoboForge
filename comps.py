@@ -111,7 +111,7 @@ class IRSensor(Component):
             self.add_node(87,y,10,5, node_id)
 
     def set_state(self, state:bool):
-        self.state = state
+        pass
 
     def get_state(self):
         return self.state
@@ -147,3 +147,32 @@ class Led(Component):
     def handle_scroll(self, y):
         # do nothing
         return None
+
+
+class TempSensor(Component):
+    def __init__(self):
+        temp_sens_img = pygame.image.load("./assets/tempsensor.png").convert_alpha()
+        super().__init__(temp_sens_img, temp_sens_img)
+        self.rect.center = (WIDTH//2, HEIGHT//2)
+        self.id = TEMPSENS
+        self.temp = 25 # default temp = room temp
+        
+        self.add_node(-28, 80, 8, 8, PIN_TEMPSENS_VCC)
+        self.add_node(0, 80, 8, 8, PIN_TEMPSENS_OUT)
+        self.add_node(29, 80, 8, 8, PIN_TEMPSENS_OUT)
+
+    # self.add_node()
+
+    def set_state(self, state:int):
+        pass
+
+    def get_state(self):
+        return self.temp
+
+    def handle_scroll(self, y):
+        if y == 1 and self.temp<150:
+            self.temp += 0.5
+        elif y == -1 and self.temp>-55:
+            self.temp -= 0.5
+
+        return ["Temp. Sen.", str(self.temp)]

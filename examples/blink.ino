@@ -1,4 +1,4 @@
-int led = 10;
+int led = LED_BUILTIN;
 
 void setup(){
     pinMode(led, OUTPUT);

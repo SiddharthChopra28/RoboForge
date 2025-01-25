@@ -197,8 +197,6 @@ void Component::connectPin(int pinid, std::shared_ptr<Wire> wire) {
     if (wire->get_no_ends_connected() == 2){
         pin->update_potential();
     }
-
-
 }
 
 void Component::disconnectPin(int pinid, std::shared_ptr<Wire> wire) const{
@@ -309,6 +307,43 @@ int Wire::get_no_ends_connected() const {
     else{
         return 2;
     }
+}
+
+//BreadBoard::BreadBoard(int nop, float opvol) : Component(nop, opvol){}
+//
+//std::shared_ptr<BreadBoard> BreadBoard::create(int nop, float opvol) {
+//    auto instance = std::make_shared<BreadBoard>(nop, opvol);
+//
+//}
+
+TempSensor::TempSensor(int no_pins, float ov) : Component(no_pins, ov){
+    // do nothing
+}
+
+std::shared_ptr<TempSensor> TempSensor::create(int no_pins, float ov){
+    auto instance = std::make_shared<TempSensor>(no_pins, ov);
+    instance->initialize();
+    return instance;
+}
+
+void TempSensor::initialize() {
+    auto self = shared_from_this();
+    pins[PIN_TEMPSENS_VCC] = std::make_shared<PowerPin>(self, PIN_TEMPSENS_VCC);
+    pins[PIN_TEMPSENS_OUT] = std::make_shared<DigitalPwmPin>(self, PIN_TEMPSENS_OUT);
+    pins[PIN_TEMPSENS_GND] = std::make_shared<PowerPin>(self, PIN_TEMPSENS_GND);
+
+    pins[PIN_TEMPSENS_VCC] -> mode = INPUT;
+    pins[PIN_TEMPSENS_OUT] -> mode = OUTPUT;
+    pins[PIN_TEMPSENS_GND] -> mode = INPUT;
+
+}
+
+int TempSensor::getState() {
+
+}
+
+void TempSensor::setState(int) {
+    
 }
 
 bool Wire::connectEnd(std::shared_ptr<Pin> pin) {

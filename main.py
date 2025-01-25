@@ -100,10 +100,13 @@ reset_button = font_rob.render("Reset", True, WHITE)
 reset_button_rect = reset_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//5))
 
 spawn_ir_button = font_rob.render("+ IR Sensor", True, WHITE)
-spawn_ir_button_rect = spawn_ir_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//4))
+spawn_ir_button_rect = spawn_ir_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+100, HEIGHT//4))
 
 spawn_led_button = font_rob.render("+ LED", True, WHITE)
-spawn_led_button_rect = spawn_led_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//3))
+spawn_led_button_rect = spawn_led_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+100, HEIGHT//4+50))
+
+spawn_tempsens_button = font_rob.render("+ Temperature Sensor", True, WHITE)
+spawn_tempsens_button_rect = spawn_tempsens_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+100, HEIGHT//4+100))
 
 upload_code_button = font_rob.render("Select File", True, WHITE)
 upload_code_button_rect = upload_code_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//4))
@@ -137,7 +140,7 @@ sock = None
 
 
 global_button_rects = [comp_t_rect, code_t_rect]
-comp_button_rects = [reset_button_rect, spawn_ir_button_rect, spawn_led_button_rect]
+comp_button_rects = [reset_button_rect, spawn_ir_button_rect, spawn_led_button_rect, spawn_tempsens_button_rect]
 code_button_rects = [upload_code_button_rect]
 visible_button_rects = global_button_rects+comp_button_rects
 
@@ -274,6 +277,9 @@ while running:
                         elif spawn_led_button_rect.collidepoint(event.pos):
                             led = Led()
                             components.append(led)
+                        elif spawn_tempsens_button_rect.collidepoint(event.pos):
+                            tempsens = TempSensor()
+                            components.append(tempsens)
 
 
 
@@ -386,6 +392,7 @@ while running:
     if active_pane == COMP:
         window.blit(spawn_ir_button, spawn_ir_button_rect.topleft)
         window.blit(spawn_led_button, spawn_led_button_rect.topleft)
+        window.blit(spawn_tempsens_button, spawn_tempsens_button_rect.topleft)
         window.blit(reset_button, reset_button_rect.topleft)
 
     elif active_pane == CODE:

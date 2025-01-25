@@ -1,6 +1,7 @@
 # unoffical docs
+Arduino uses 10 bit ADC  
 
-things to add: serial output & input, breadboard, temperature sensor, dc motor
+things to add: serial output & input, **breadboard**, temperature sensor, dc motor
 
 IMP: need to have g++ installed on linux  
 

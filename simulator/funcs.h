@@ -15,7 +15,7 @@ using namespace std;
 void pinMode_(std::shared_ptr<Arduino> ard, uint8_t pin, uint8_t mode);
 void digitalWrite_(std::shared_ptr<Arduino> ard, uint8_t pin, uint8_t val);
 int digitalRead_(std::shared_ptr<Arduino> ard, uint8_t pin);
-int analogRead_(std::shared_ptr<Arduino> ard, uint8_t pin);
+int analogRead_(std::shared_ptr<Arduino> ard, uint8_t pin); // max value can be 1023 and min 0
 void analogReference_(std::shared_ptr<Arduino> ard, uint8_t mode);
 void analogWrite_(std::shared_ptr<Arduino> ard, uint8_t pin, int val);
 

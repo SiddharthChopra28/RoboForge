@@ -66,6 +66,10 @@ using namespace std;
 #define PIN_LED_POS 0
 #define PIN_LED_NEG 1
 
+#define PIN_TEMPSENS_VCC 0
+#define PIN_TEMPSENS_OUT 1
+#define PIN_TEMPSENS_GND 2
+
 #define DIGITAL 0
 #define DIGITALPWM 1
 #define ANALOG 2
@@ -128,8 +132,24 @@ public:
 
 };
 
-class BreadBoard: public Component{
-    BreadBoard();
+//class BreadBoard: public Component{
+//public:
+//    BreadBoard(int nop, float opvol);
+//    static std::shared_ptr<BreadBoard> create(int nop, float opvol);
+//    void initialize();
+//    int getState() override;
+//    void setState(int) override;
+//};
+
+class TempSensor: public Component{
+public:
+    TempSensor(int no_pins, float ov);
+    static std::shared_ptr<TempSensor> create(int no_pins, float ov);
+    void initialize();
+    int getState() override;
+    void setState(int) override;
+
+
 };
 
 

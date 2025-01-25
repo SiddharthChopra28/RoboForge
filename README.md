@@ -8,7 +8,7 @@ python 3.12 with modules listed in requirements.txt
 not tested
 
 ## User's manual
-A file, ```sample.ino``` is included for your reference.  
+Example ino files in ```examples/``` are included for your reference.  
   
 To connect a wire, right click on any pin to get a wire at your mouse pointer. To connect this wire, right click again at any pin.  
 Right clicking on a connected wire will disconnect it and attach it to your pointer. To delete a wire, press ```ESC``` while holding the wire with your pointer.  

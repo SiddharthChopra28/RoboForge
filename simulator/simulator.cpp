@@ -1,6 +1,6 @@
 #include "Arduino.h"
 
-Socket sock = Socket("127.0.0.1", 2892);
+Socket sock = Socket("127.0.0.1", 5613);
 
 void send_msg(){
     static string prev;
@@ -11,18 +11,26 @@ void send_msg(){
     sock.sendMessage(o);
     prev = o;
 }
-int led = 10;
+int led = 11;
+int led2 = 10;
+int ir = 4;
 
 void setup(){
     pinMode(led, OUTPUT);
-
+    pinMode(led2, OUTPUT);
+    pinMode(ir, INPUT);
 }
 
 void loop(){
-    digitalWrite(led, HIGH);
-    delay(1000);
-    digitalWrite(led, LOW);
-    delay(1000);
+    bool ir_reading = digitalRead(ir);
+    if (ir_reading){
+        digitalWrite(led, HIGH);
+        digitalWrite(led2, HIGH);
+    }
+    else{
+        digitalWrite(led, LOW);
+        digitalWrite(led2, HIGH);
+    }
 
 }
 
