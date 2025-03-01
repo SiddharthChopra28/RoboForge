@@ -78,7 +78,7 @@ def ardparser(filename, port):
             return 2
 
         subprocess.run("cd simulator && g++ -o simulator simulator.cpp hserial.cpp sock.cpp funcs.cpp components.cpp _time.cpp engine.cpp", shell=True)
-        subprocess.Popen(["xterm", "./simulator/simulator"])
+        subprocess.Popen(["xterm","-e", "./simulator/simulator"])
         return 0
 
     elif sys.platform == "win32":

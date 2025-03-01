@@ -15,18 +15,6 @@ def open_file_dialog():
     return file_path
 
 
-# terminal_window_opened = False
-# terminal_window_thread = None
-# def make_terminal_window():
-#     app = QApplication([])
-#     console = QWidget()
-#     console.setWindowTitle("Serial Monitor")
-#     label = QLabel("Hello, this is some text in a new window!")
-#     label.setWordWrap(True)  # Enable text wrapping
-#     label.setAlignment(Qt.AlignmentFlag.AlignCenter) #Center the text
-#     console.show()
-#     app.exec()
-
 
 
 stop_thread = False
@@ -342,15 +330,15 @@ while running:
 
 
                 else:
-                        if stop_code_button_rect.collidepoint(event.pos):
-                            sock.send_msg(f"COMMAND:EXIT:")
-                            stop_thread = True
-                            sock.end_sock()
-                            socket_thread.join()
-                            sock = None
-                            socket_connected = False
-                            socket_thread = None
-                            editing_mode = True
+                    if stop_code_button_rect.collidepoint(event.pos):
+                        sock.send_msg(f"COMMAND:EXIT:")
+                        stop_thread = True
+                        sock.end_sock()
+                        socket_thread.join()
+                        sock = None
+                        socket_connected = False
+                        socket_thread = None
+                        editing_mode = True
 
 
 

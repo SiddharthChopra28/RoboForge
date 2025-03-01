@@ -12,7 +12,9 @@ currently works only on linux
 python 3.12 with modules listed in requirements.txt
 
 ## User's manual
-Example ino files in ```examples/``` are included for your reference.  
+To run the app, use python ```main.py``` 
+
+Example ino files in ```examples/``` are included for your reference.
   
 To connect a wire, right click on any pin to get a wire at your mouse pointer. To connect this wire, right click again at any pin.  
 

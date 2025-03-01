@@ -133,14 +133,14 @@ public:
 
 };
 
-//class BreadBoard: public Component{
-//public:
-//    BreadBoard(int nop, float opvol);
-//    static std::shared_ptr<BreadBoard> create(int nop, float opvol);
-//    void initialize();
-//    int getState() override;
-//    void setState(int) override;
-//};
+class BreadBoard: public Component{
+public:
+    BreadBoard(int nop, float opvol);
+    static std::shared_ptr<BreadBoard> create(int nop, float opvol);
+    void initialize();
+    int getState() override;
+    void setState(int) override;
+};
 
 class TempSensor: public Component{
 public:
