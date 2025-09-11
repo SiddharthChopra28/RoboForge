@@ -14,9 +14,6 @@ def open_file_dialog():
     app.exit()
     return file_path
 
-
-
-
 stop_thread = False
 def process_input(sc):
     while not stop_thread:
@@ -278,8 +275,6 @@ while running:
                         elif spawn_tempsens_button_rect.collidepoint(event.pos):
                             tempsens = TempSensor()
                             components.append(tempsens)
-
-
 
                 elif active_pane == CODE:
                     if editing_mode:

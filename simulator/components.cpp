@@ -308,12 +308,12 @@ int Wire::get_no_ends_connected() const {
     }
 }
 
-BreadBoard::BreadBoard(int nop, float opvol) : Component(nop, opvol){}
-
-std::shared_ptr<BreadBoard> BreadBoard::create(int nop, float opvol) {
-    auto instance = std::make_shared<BreadBoard>(nop, opvol);
-
-}
+//BreadBoard::BreadBoard(int nop, float opvol) : Component(nop, opvol){}
+//
+//std::shared_ptr<BreadBoard> BreadBoard::create(int nop, float opvol) {
+//    auto instance = std::make_shared<BreadBoard>(nop, opvol);
+//
+//}
 
 TempSensor::TempSensor(int no_pins, float ov) : Component(no_pins, ov){
 }
