@@ -7,8 +7,9 @@
 #define INTERNAL 3
 #define INTERNAL2V56 3
 
-#include "components.h"
+#include "components/bundle.h"
 #include <iostream>
+#include <cstdint>
 #include<typeinfo>
 using namespace std;
 

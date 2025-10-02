@@ -1,6 +1,6 @@
 #include "Arduino.h"
 
-Socket sock = Socket("127.0.0.1", 9244);
+Socket sock = Socket("127.0.0.1", 7728);
 
 void send_msg(){
     static string prev;

@@ -176,3 +176,31 @@ class TempSensor(Component):
             self.temp -= 0.5
 
         return ["Temp. Sen.", str(self.temp)]
+
+
+class BreadBoard(Component):
+    def __init__(self):
+        breadboard_img = pygame.image.load("./assets/breadboard.png").convert_alpha()
+        super().__init__(breadboard_img, breadboard_img)
+        self.rect.center = (WIDTH//2, HEIGHT//2)
+        self.id = BREADBORD
+
+        dely = 19.95
+        y0 = -38
+        delx = 19.65
+        x0 = -97
+
+        for i in range(11):
+            for j in range(5):
+                self.add_node(x0+i*delx, y0+j*dely, 4, 4, 10*i+j) # need to ensure a unique id for each node
+
+
+    def set_state(self, _):
+        return
+
+    def get_state(self):
+        return
+
+    def handle_scroll(self, _):
+        return
+

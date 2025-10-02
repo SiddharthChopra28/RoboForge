@@ -3,7 +3,7 @@
 
 #include<iostream>
 //#include<vector>
-#include "components.h"
+#include "components/bundle.h"
 #include "json.hpp"
 
 using namespace std;

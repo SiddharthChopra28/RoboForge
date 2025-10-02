@@ -77,8 +77,11 @@ def ardparser(filename, port):
             print("xterm not found")
             return 2
 
-        subprocess.run("cd simulator && g++ -o simulator simulator.cpp hserial.cpp sock.cpp funcs.cpp components.cpp _time.cpp engine.cpp", shell=True)
-        subprocess.Popen(["xterm","-e", "./simulator/simulator"])
+        # subprocess.run("cd simulator && g++ -o simulator simulator.cpp hserial.cpp sock.cpp funcs.cpp components.cpp _time.cpp engine.cpp", shell=True)
+        if not "build" in os.listdir():
+            os.mkdir("build")
+        subprocess.run("cd build && cmake .. && cmake --build .", shell=True)
+        subprocess.Popen(["xterm","-e", "./build/simulator"])
         return 0
 
     elif sys.platform == "win32":

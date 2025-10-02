@@ -1,5 +1,7 @@
 from json import JSONDecodeError
 
+import pygame.draw
+
 from comps import *
 from socks import Sock
 from ardparser import ardparser
@@ -101,6 +103,9 @@ spawn_led_button_rect = spawn_led_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+1
 spawn_tempsens_button = font_rob.render("+ Temperature Sensor", True, WHITE)
 spawn_tempsens_button_rect = spawn_tempsens_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+100, HEIGHT//4+100))
 
+spawn_breadboard_button = font_rob.render("+ Breadboard", True, WHITE)
+spawn_breadboard_button_rect = spawn_breadboard_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+100, HEIGHT//4+150))
+
 upload_code_button = font_rob.render("Select File", True, WHITE)
 upload_code_button_rect = upload_code_button.get_rect(topleft=(WIDTH-SIDEBAR_WIDTH+144, HEIGHT//4))
 
@@ -139,7 +144,8 @@ sock = None
 
 
 global_button_rects = [comp_t_rect, code_t_rect]
-comp_button_rects = [reset_button_rect, spawn_ir_button_rect, spawn_led_button_rect, spawn_tempsens_button_rect]
+comp_button_rects = [reset_button_rect, spawn_ir_button_rect, spawn_led_button_rect, spawn_tempsens_button_rect, spawn_breadboard_button_rect]
+comp_buttons = [reset_button, spawn_ir_button, spawn_led_button, spawn_tempsens_button, spawn_breadboard_button]
 code_button_rects = [upload_code_button_rect]
 visible_button_rects = global_button_rects+comp_button_rects
 
@@ -186,11 +192,11 @@ while running:
         elif event.type == pygame.KEYDOWN:
 
             if event.key == pygame.K_ESCAPE:
+                wire_node1.wire = None
                 wire_node1 = None
 
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
-
 
             if event.button == 1:
                 #check for dragging of components
@@ -199,6 +205,8 @@ while running:
                         component.being_dragged = True
                         component.drag_mouse_coord = event.pos
                         component.drag_og_coord = component.rect.center
+                        print("event.pos", event.pos)
+                        print("component.rect.center", component.rect.center)
                         break
 
             elif event.button == 3:
@@ -260,6 +268,7 @@ while running:
                 if active_pane == COMP:
                     # check for buttons
                     if editing_mode:
+
                         if reset_button_rect.collidepoint(event.pos):
                             wires = []
                             components = []
@@ -275,6 +284,9 @@ while running:
                         elif spawn_tempsens_button_rect.collidepoint(event.pos):
                             tempsens = TempSensor()
                             components.append(tempsens)
+                        elif spawn_breadboard_button_rect.collidepoint(event.pos):
+                            breadboard = BreadBoard()
+                            components.append(breadboard)
 
                 elif active_pane == CODE:
                     if editing_mode:
@@ -336,9 +348,6 @@ while running:
                         editing_mode = True
 
 
-
-
-
         elif event.type == pygame.MOUSEWHEEL:
             showing_data = None # [title, string]
             if event.y == 1 or event.y == -1:
@@ -390,10 +399,8 @@ while running:
 
     # render conditional components:
     if active_pane == COMP:
-        window.blit(spawn_ir_button, spawn_ir_button_rect.topleft)
-        window.blit(spawn_led_button, spawn_led_button_rect.topleft)
-        window.blit(spawn_tempsens_button, spawn_tempsens_button_rect.topleft)
-        window.blit(reset_button, reset_button_rect.topleft)
+        for n, button in enumerate(comp_buttons):
+            window.blit(button, comp_button_rects[n])
 
     elif active_pane == CODE:
         window.blit(upload_code_button, upload_code_button_rect.topleft)
