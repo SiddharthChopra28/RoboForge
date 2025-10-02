@@ -8,5 +8,4 @@ simulator/sock
 simulator/Docs.md
 .idea/
 .venv/
-CMakeLists.txt
 build/
