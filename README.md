@@ -8,7 +8,7 @@ currently works only on linux
 ### For Linux
 ```cmake``` command should be available.  
 ```xterm``` should be available / installed for the app to work.  
-python 3.12 with modules listed in requirements.txt
+python 3+ with modules listed in requirements.txt
 
 ## User's manual
 To run the app, use python ```main.py``` 
