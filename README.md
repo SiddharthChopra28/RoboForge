@@ -3,11 +3,10 @@ Virtual playground for designing and testing Arduino circuits
 
 ### Note
 currently works only on linux  
-(tested on ubuntu 22.04)
 
 ## Requirements
 ### For Linux
-```g++``` command should be available.  
+```cmake``` command should be available.  
 ```xterm``` should be available / installed for the app to work.  
 python 3.12 with modules listed in requirements.txt
 
