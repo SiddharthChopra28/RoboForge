@@ -1,3 +1,5 @@
+// circuit diagram- VCC to 5V, GND to GND and OUT to A0
+
 int temp_sens = A0;
 
 void setup(){
