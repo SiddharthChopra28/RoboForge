@@ -1,3 +1,5 @@
+// circuit diagram - connect +ve end of external LED to 10 and negative to GND
+
 int led = LED_BUILTIN;
 int led2 = 10;
 
