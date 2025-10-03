@@ -1,3 +1,5 @@
+//circuit diagram - 1 external led with +ve at 11 & -ve at GND and another external LED with +ve at 10 and -ve at GND. One IR Sensor with out at 4, VCC to 5V and GND to GND
+
 int led = 11;
 int led2 = 10;
 int ir = 4;
